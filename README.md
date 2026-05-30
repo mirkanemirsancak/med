@@ -45,12 +45,30 @@ sınıfı** (hafif / orta / ağır / hayati_tehdit / belirsiz) ve **yönlendirme
 - **1.1** `docs/test_vinyet.js`: vinyet regresyon koşucusu. **Kırmızı bayrak
   duyarlılığı %100** ve **under-triage = 0** değilse Node'da hata koduyla çıkar
   (regresyon kapısı). Mevcut: **42/42 isabet, duyarlılık %100, kaçırma 0**.
-- **1.2** Karışıklık matrisi + over-triage (aşırı sevk) oranı raporlanır.
+- **1.2** Karışıklık matrisi + over-triage (aşırı sevk) oranı raporlanır. Over-triage
+  artık **klinik tabana** (`klinik_gold`) göre ölçülür ve "fail-safe gereği kabul"
+  ile "beklenmedik" olarak ayrılır — sıfır-over yanıltıcı güveni oluşturmaz.
+
+### Doğrulama katmanları ve dürüstlük sınırı
+
+- **`docs/vinyetler.json`** — temel regresyon seti (iç tutarlılık).
+- **`docs/vinyetler_sinir.json`** — adversaryal/sınır seti: eşik kenarları
+  (off-by-one), çelişkili sinyaller, kasıtlı belirsizlik, kabul edilen over-triage.
+  Bu set bir gerçek bug yakaladı (S02: erişkin SaO₂=90 fail-safe boşluğu → düzeltildi).
+- **`test_parite.py`** — **çapraz-motor parite**: aynı vinyetleri hem Python hem JS
+  motorundan geçirip çıktının birebir aynı olduğunu doğrular (iki motor sapamaz).
+
+> Bu testler **iç tutarlılık** ve **iki-motor uyumu** kanıtlar; **dış geçerlilik
+> DEĞİL**. Vinyetler kurgudur, gerçek hasta verisi yoktur. Semptom kontrolcüleri
+> için referans nokta ~%57 uygun triyaj (Semigran ve ark., *BMJ* 2015); iddialar
+> bu zemine göre mütevazı tutulmalıdır.
 
 ```bash
-node docs/test_vinyet.js     # CI/regresyon kapısı (exit 0 = geçti)
+./test_hepsi.sh              # üç kapıyı birden çalıştırır (exit 0 = hepsi geçti)
+node docs/test_vinyet.js     # yalnız regresyon + sınır kapısı
+python3 test_parite.py       # yalnız çapraz-motor parite
 ```
-Tarayıcıda: `docs/test.html` aç.
+Tarayıcıda: `docs/test.html` aç (her iki vinyet setini yükler).
 
 ## Vaka şeması
 
@@ -71,8 +89,25 @@ python3 triyaj_cli.py --girdi ornek_vaka.json     # dosyadan, insan-okur
 cat ornek_vaka_cocuk.json | python3 triyaj_cli.py --json
 ```
 
+## Açık maddeler (kapanmadı — bilinçli)
+
+Kod doğrulanmış olsa da şu maddeler **klinik/yönetişim** kararı bekler:
+
+- **Klinik imza:** Pediatrik nabız eşikleri (`cocuk_nabiz_ust_sinir`) ve erişkin
+  solunum "orta" bandı (25–30) tarafımızca konuldu; göğüs hastalıkları uzmanı
+  onayı gerekir. Kodda "KLİNİK ONAY BEKLER" olarak işaretli.
+- **Güncel GINA:** Kaynak TTD/GINA 2007 dönemi. Triyaj için kabul edilebilir;
+  SaO₂ kesim noktaları güncel GINA ile çapraz kontrol edilmeli (tedavi eklenirse
+  zorunlu).
+- **Regülasyon konumu:** "Tıbbi cihaz değildir" ibaresi etik korur ama sınıfı
+  değiştirmez; MDR 2017/745 Kural 11 kapsamında muhtemelen Sınıf IIa. Bilgi aracı
+  mı / tıbbi cihaz mı kararı bütçe/takvimden önce verilmelidir.
+- **Denetim izi:** Sürüm damgası var; girdi+çıktıyı kalıcı, indirilebilir bir kayda
+  yazmak savunulabilirlik için önerilir.
+
 ## Sonraki adımlar (planlanan)
 
-Tier 2 (LLM slot-filling konuşma katmanı, TR/EN, RAG açıklama) ve Tier 3
-(hekim gözden geçirme, güncel GINA çapraz kontrol, regülasyon konumlandırma)
-motor doğrulandıktan **sonra** gelir.
+Tier 2.1 (LLM slot-filling konuşma katmanı — laik kullanıcı "sessiz akciğer"i
+kendi bildiremez; mevcut hasta formu klinik okuryazarlık varsayıyor) ve Tier 2.3
+(hekim-modu RAG açıklama, rehber pasajına bağlı) motor doğrulandıktan **sonra**
+sıradaki en değerli adımlardır.

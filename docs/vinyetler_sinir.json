@@ -1,0 +1,37 @@
+{
+  "_meta": {
+    "surum": "0.1.0",
+    "kapsam": "ADVERSARYAL / SINIR vinyetler. Esik kenarlari, off-by-one, celiskili sinyaller, kasitli belirsizlik.",
+    "amac": "Mukemmel diyagonal matrisin ic-tutarliligi olcmesi; bu set guvenlik/ozgulluk gerilimini ZORLAR. Kurgu vakalar.",
+    "notlar": "Bazi vakalar fail-safe geregi BILEREK yukari yuvarlanir (over_triage_beklenen=true). Bu, hata degil tasarim; metrik bunu ayirt etmeli."
+  },
+  "vinyetler": [
+    { "id": "S01", "kategori": "sinir_sao2", "beklenen": "hayati_tehdit", "aciklama": "SaO2 tam 90: terfi esigi '<90' oldugu icin 90 terfi ETMEZ; eriskinde 90 -> 'agir' (orta degil). Off-by-one kontrolu.", "vaka": { "yas_grubu": "eriskin", "parametreler": { "P_SAO2": 89.9 } } },
+    { "id": "S02", "kategori": "sinir_sao2", "beklenen": "agir", "aciklama": "SaO2 tam 90 (eriskin): <90 degil -> terfi yok; sinif_sao2'da v<90 false, v<=95 -> ama 90 agir bandinda mi? eriskinde <90 agir, 90 -> orta sinirinda. Sinir testi.", "vaka": { "yas_grubu": "eriskin", "parametreler": { "P_SAO2": 90 } }, "not": "beklenen deger motor davranisina gore dogrulanacak; amac sinirda tutarlilik" },
+    { "id": "S03", "kategori": "sinir_nabiz", "beklenen": "orta", "aciklama": "Eriskin nabiz tam 100: '>=100 orta' -> orta (off-by-one alt sinir).", "vaka": { "yas_grubu": "eriskin", "parametreler": { "P_NABIZ": 100 } } },
+    { "id": "S04", "kategori": "sinir_nabiz", "beklenen": "hafif", "aciklama": "Eriskin nabiz 99: 100'un hemen altinda -> hafif.", "vaka": { "yas_grubu": "eriskin", "parametreler": { "P_NABIZ": 99 } } },
+    { "id": "S05", "kategori": "sinir_nabiz", "beklenen": "agir", "aciklama": "Eriskin nabiz tam 121: '>120 agir' -> agir.", "vaka": { "yas_grubu": "eriskin", "parametreler": { "P_NABIZ": 121 } } },
+    { "id": "S06", "kategori": "sinir_nabiz", "beklenen": "orta", "aciklama": "Eriskin nabiz tam 120: '>120' degil -> hala orta (sinir).", "vaka": { "yas_grubu": "eriskin", "parametreler": { "P_NABIZ": 120 } } },
+    { "id": "S07", "kategori": "sinir_solunum", "beklenen": "orta", "aciklama": "Eriskin solunum tam 25: yeni 'orta' bandi alt siniri (>=25).", "vaka": { "yas_grubu": "eriskin", "parametreler": { "P_SOLUNUM_HIZI": 25 } } },
+    { "id": "S08", "kategori": "sinir_solunum", "beklenen": "hafif", "aciklama": "Eriskin solunum 24: orta bandinin hemen altinda -> hafif.", "vaka": { "yas_grubu": "eriskin", "parametreler": { "P_SOLUNUM_HIZI": 24 } } },
+    { "id": "S09", "kategori": "sinir_solunum", "beklenen": "agir", "aciklama": "Eriskin solunum tam 31: '>30 agir'.", "vaka": { "yas_grubu": "eriskin", "parametreler": { "P_SOLUNUM_HIZI": 31 } } },
+    { "id": "S10", "kategori": "sinir_pediatrik_nabiz", "beklenen": "hafif", "aciklama": "5 yas (60 ay) tam: cocukNabizUstSinir sinir gecisi (60'ta 120 esigi). Nabiz 120 -> '>120' degil -> hafif.", "vaka": { "yas_grubu": "cocuk", "yas_ay": 60, "parametreler": { "P_NABIZ": 120 } } },
+    { "id": "S11", "kategori": "sinir_pediatrik_nabiz", "beklenen": "orta", "aciklama": "5 yas nabiz 121: yas-ust-siniri 120 asildi -> orta.", "vaka": { "yas_grubu": "cocuk", "yas_ay": 60, "parametreler": { "P_NABIZ": 121 } } },
+    { "id": "S12", "kategori": "sinir_pediatrik_nabiz", "beklenen": "agir", "aciklama": "5 yas nabiz 139: 120*1.15=138 asildi -> belirgin tasikardi -> agir.", "vaka": { "yas_grubu": "cocuk", "yas_ay": 60, "parametreler": { "P_NABIZ": 139 } } },
+
+    { "id": "S13", "kategori": "celiski", "beklenen": "hayati_tehdit", "aciklama": "Celiskili: konusma 'cumleler' (hafif) AMA sessiz akciger kirmizi bayrak. En agir/kirmizi kazanmali.", "vaka": { "yas_grubu": "eriskin", "kirmizi_bayrak": ["RF_SESSIZ_AKCIGER"], "parametreler": { "P_KONUSMA": "cumleler", "P_NABIZ": 70, "P_SAO2": 99 } } },
+    { "id": "S14", "kategori": "celiski", "beklenen": "agir", "aciklama": "Celiskili: SaO2 98 (hafif) + nefes darligi 'dinlenmede' (agir). En agir kazanir -> agir.", "vaka": { "yas_grubu": "eriskin", "parametreler": { "P_SAO2": 98, "P_NEFES_DARLIGI": "dinlenmede" } } },
+    { "id": "S15", "kategori": "celiski", "beklenen": "hayati_tehdit", "aciklama": "Celiskili sayisal terfi: SaO2 85 (terfi->hayati) digerleri hafif. Terfi bypass'i celiskiye ragmen calismali.", "vaka": { "yas_grubu": "eriskin", "parametreler": { "P_SAO2": 85, "P_NABIZ": 70, "P_KONUSMA": "cumleler" } } },
+
+    { "id": "S16", "kategori": "fail_safe_belirsiz", "beklenen": "belirsiz", "aciklama": "Yas-grubu eriskin ama hicbir taninabilir parametre yok (bos) -> belirsiz.", "vaka": { "yas_grubu": "eriskin", "parametreler": {} } },
+    { "id": "S17", "kategori": "fail_safe_belirsiz", "beklenen": "belirsiz", "aciklama": "Sadece taninmayan parametre kodu -> siniflanamaz -> belirsiz (yukari yuvarla).", "vaka": { "yas_grubu": "eriskin", "parametreler": { "P_BILINMEYEN_KOD": 42 } } },
+    { "id": "S18", "kategori": "fail_safe_belirsiz", "beklenen": "belirsiz", "aciklama": "Cocuk, sadece yasa-bagli parametre (RR) AMA yas yok -> eriskin esigi uygulanmaz -> belirsiz.", "vaka": { "yas_grubu": "cocuk", "parametreler": { "P_SOLUNUM_HIZI": 35, "P_NABIZ": 130 } } },
+
+    { "id": "S19", "kategori": "over_triage_kabul", "beklenen": "orta", "klinik_gold": "hafif", "over_triage_beklenen": true, "aciklama": "Klinik taban HAFIF (eforla, cumleler) AMA entubasyon oykusu fail-safe geregi orta'ya yukseltir. KABUL EDILEN over-triage; metrik bunu hafif->orta olarak sayar.", "vaka": { "yas_grubu": "eriskin", "parametreler": { "P_NEFES_DARLIGI": "eforla", "P_KONUSMA": "cumleler", "P_NABIZ": 80 }, "risk_faktorleri": ["RISK_ENTUBASYON_OYKU"] } },
+    { "id": "S20", "kategori": "over_triage_kabul", "beklenen": "agir", "klinik_gold": "orta", "over_triage_beklenen": true, "aciklama": "Klinik taban ORTA (nabiz 110) AMA 2 risk faktoru tek basamak yukseltir -> agir. Risk faktorunun 'hayati' yapMAMASI (tavan) da test edilir. KABUL EDILEN over-triage.", "vaka": { "yas_grubu": "eriskin", "parametreler": { "P_NABIZ": 110 }, "risk_faktorleri": ["RISK_ENTUBASYON_OYKU", "RISK_SON_YIL_YATIS"] } },
+    { "id": "S21", "kategori": "risk_tavan", "beklenen": "agir", "aciklama": "TAVAN testi: agir tablo (solunum 34) + risk faktoru. Risk 'agir'i 'hayati'ye CIKARMAMALI (tavan agir).", "vaka": { "yas_grubu": "eriskin", "parametreler": { "P_SOLUNUM_HIZI": 34 }, "risk_faktorleri": ["RISK_ENTUBASYON_OYKU"] } },
+
+    { "id": "S22", "kategori": "pediatrik_pef_guard", "beklenen": "belirsiz", "aciklama": "4 yas (48 ay) tek PEF 45 (cok dusuk gorunur) AMA <5 yas PEF guvenilmez -> dikkate alinmaz -> belirsiz. Yanlis-acil onleme.", "vaka": { "yas_grubu": "cocuk", "yas_ay": 48, "parametreler": { "P_PEF": 45 } } },
+    { "id": "S23", "kategori": "pediatrik_pef_guard", "beklenen": "agir", "aciklama": "5 yas (60 ay) PEF 55 (<60) -> bu yasta guvenilir -> agir. PEF guard'in dogru tarafta acilmasi.", "vaka": { "yas_grubu": "cocuk", "yas_ay": 60, "parametreler": { "P_PEF": 55 } } }
+  ]
+}

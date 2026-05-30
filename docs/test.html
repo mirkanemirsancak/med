@@ -16,10 +16,13 @@
   <script src="triyaj_motor.js"></script>
   <script src="test_vinyet.js"></script>
   <script>
-    fetch("vinyetler.json")
-      .then(r => r.json())
-      .then(data => {
-        const rapor = TriyajTest.testleriCalistir(TriyajMotor, data.vinyetler);
+    Promise.all([
+      fetch("vinyetler.json").then(r => r.json()),
+      fetch("vinyetler_sinir.json").then(r => r.json())
+    ])
+      .then(([ana, sinir]) => {
+        const vinyetler = ana.vinyetler.concat(sinir.vinyetler);
+        const rapor = TriyajTest.testleriCalistir(TriyajMotor, vinyetler);
         document.getElementById("cikti").textContent = TriyajTest.metniBicimle(rapor);
         const ozet = document.getElementById("ozet");
         ozet.textContent = rapor.gecti

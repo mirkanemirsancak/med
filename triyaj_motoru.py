@@ -127,7 +127,10 @@ def sinif_sao2(v, vaka):
         if v > 95: return "hafif"
         if v >= 92: return "orta"
         return "agir"          # 90-91 (90 alti zaten terfi -> hayati)
-    if v < 90: return "agir"
+    # Eriskin: <90 zaten terfi -> hayati. Tam 90 rehberde TANIMSIZ bosluk
+    # (rehber: <90 agir, 91-95 orta). Fail-safe geregi 90 -> 'agir' (yukari
+    # yuvarla), 'orta'ya DUSURME. Sinir vinyeti S02 ile yakalandi.
+    if v <= 90: return "agir"
     if v <= 95: return "orta"
     return "hafif"
 

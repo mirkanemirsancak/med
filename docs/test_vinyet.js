@@ -27,6 +27,7 @@
     let rfTop = 0, rfYakalanan = 0;
     let underTop = 0, under = 0;     // kacirma: tahmin < beklenen (derecelendirilmis)
     let degerlendirilen = 0, over = 0; // asiri sevk: tahmin > beklenen
+    let overBeklenen = 0, overBeklenmedik = 0; // fail-safe geregi vs beklenmedik
     const matris = {}; // beklenen -> { tahmin -> sayi }
 
     for (const v of vinyetler) {
@@ -47,14 +48,17 @@
       (matris[beklenen] = matris[beklenen] || {});
       matris[beklenen][tahmin] = (matris[beklenen][tahmin] || 0) + 1;
 
-      // under/over yalnizca iki taraf da derecelendirilmisse anlamli
-      if (beklenen in DERECE && tahmin in DERECE) {
+      // under/over: 'beklenen' motor SOZLESMESIDIR (motor ne demeli). Over-triage
+      // ise KLINIK TABANA (klinik_gold) gore olculur; yoksa beklenen kullanilir.
+      // Boylece risk-eskalasyonu gibi fail-safe yukseltmeleri GIZLENMEZ, izlenir.
+      const gold = v.klinik_gold || beklenen;
+      if (gold in DERECE && tahmin in DERECE) {
         degerlendirilen++;
-        if (DERECE[tahmin] < DERECE[beklenen]) { under++; underTop++; }
-        else if (DERECE[tahmin] > DERECE[beklenen]) over++;
-      } else if (beklenen in DERECE) {
-        // beklenen derecelendirilmis ama tahmin 'belirsiz' -> guvenli yuvarlama,
-        // kacirma sayilmaz (asagi degil yukari/yana). Yine de izlenebilir.
+        if (DERECE[tahmin] < DERECE[gold]) { under++; underTop++; }
+        else if (DERECE[tahmin] > DERECE[gold]) {
+          over++;
+          if (v.over_triage_beklenen) overBeklenen++; else overBeklenmedik++;
+        }
       }
     }
 
@@ -65,11 +69,14 @@
       isabet: toplam ? dogru / toplam : 0,
       rf: { toplam: rfTop, yakalanan: rfYakalanan, duyarlilik: rfTop ? rfYakalanan / rfTop : 1 },
       underTriage: { sayi: under, oran: degerlendirilen ? under / degerlendirilen : 0 },
-      overTriage: { sayi: over, oran: degerlendirilen ? over / degerlendirilen : 0 },
+      overTriage: { sayi: over, oran: degerlendirilen ? over / degerlendirilen : 0,
+                    beklenen: overBeklenen, beklenmedik: overBeklenmedik },
       matris,
       satirlar,
-      // KAPI: kacirma sifir VE kirmizi bayrak duyarliligi %100
-      gecti: under === 0 && rfYakalanan === rfTop
+      // KAPI: kacirma sifir, kirmizi bayrak duyarliligi %100 VE
+      // tahminin beklenenden saptigi (gecti=false) ama kacirma da olmayan
+      // (yani beklenmedik over-triage) vaka olmamali.
+      gecti: under === 0 && rfYakalanan === rfTop && overBeklenmedik === 0
     };
     return rapor;
   }
@@ -88,7 +95,8 @@
     L.push(`Toplam isabet            : ${r.dogru}/${r.toplam} (%${(100 * r.isabet).toFixed(1)})`);
     L.push(`KIRMIZI BAYRAK DUYARLILIK : ${r.rf.yakalanan}/${r.rf.toplam} (%${(100 * r.rf.duyarlilik).toFixed(1)})  <- hedef %100`);
     L.push(`Under-triage (KACIRMA)   : ${r.underTriage.sayi} (%${(100 * r.underTriage.oran).toFixed(1)})  <- hedef 0`);
-    L.push(`Over-triage (asiri sevk) : ${r.overTriage.sayi} (%${(100 * r.overTriage.oran).toFixed(1)})  <- izlenen metrik`);
+    L.push(`Over-triage (asiri sevk) : ${r.overTriage.sayi} (%${(100 * r.overTriage.oran).toFixed(1)})  | fail-safe kabul: ${r.overTriage.beklenen}, BEKLENMEDIK: ${r.overTriage.beklenmedik}`);
+    L.push(`   (klinik tabana gore olculur; fail-safe yukseltmeleri 'kabul', digerleri kapiyi kapatir)`);
     L.push("-".repeat(64));
     L.push("Karisiklik matrisi (satir=beklenen, sutun=tahmin):");
     for (const beklenen of SIRA) {
@@ -110,9 +118,16 @@ if (typeof module === "object" && module.exports && require.main === module) {
   const path = require("path");
   const motor = require("./triyaj_motor.js");
   const test = module.exports;
-  const vinyetler = JSON.parse(
-    fs.readFileSync(path.join(__dirname, "vinyetler.json"), "utf8")
-  ).vinyetler;
+  // Ana set + adversaryal/sinir seti birlikte kosulur (argumanla tek set secilebilir).
+  const setler = process.argv.slice(2).length
+    ? process.argv.slice(2)
+    : ["vinyetler.json", "vinyetler_sinir.json"];
+  let vinyetler = [];
+  for (const s of setler) {
+    const p = path.isAbsolute(s) ? s : path.join(__dirname, s);
+    vinyetler = vinyetler.concat(JSON.parse(fs.readFileSync(p, "utf8")).vinyetler);
+  }
+  console.log(`Setler: ${setler.join(", ")}  (toplam ${vinyetler.length} vinyet)`);
   const rapor = test.testleriCalistir(motor, vinyetler);
   console.log(test.metniBicimle(rapor));
   process.exit(rapor.gecti ? 0 : 1);

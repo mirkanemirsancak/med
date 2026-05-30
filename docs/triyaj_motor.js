@@ -17,7 +17,7 @@
   // KURAL SETI (triyaj_kurallari_v1.json'dan gomulu)
   // -------------------------------------------------------------------------
   const KURALLAR = {
-    _meta: { surum: "0.3.0", kaynak: "Turk Toraks Dernegi Astim Rehberi (GINA temelli)" },
+    _meta: { surum: "0.4.0", kaynak: "Turk Toraks Dernegi Astim Rehberi (GINA temelli)" },
     kirmizi_bayraklar: {
       astim_hayati_tehdit: [
         { kod: "RF_SESSIZ_AKCIGER", tr: "Hisilti duyulmuyor / 'sessiz akciger'", en: "Silent chest" },
@@ -153,7 +153,10 @@
       if (v >= 92) return "orta";
       return "agir"; // 90-91 (90 alti zaten terfi -> hayati)
     }
-    if (v < 90) return "agir";
+    // Eriskin: <90 zaten terfi -> hayati. Tam 90 rehberde TANIMSIZ bosluk
+    // (rehber: <90 agir, 91-95 orta). Fail-safe geregi 90 -> 'agir' (yukari
+    // yuvarla), 'orta'ya DUSURME. Sinir vinyeti S02 ile yakalandi.
+    if (v <= 90) return "agir";
     if (v <= 95) return "orta";
     return "hafif";
   }
