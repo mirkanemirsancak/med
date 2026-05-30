@@ -1,0 +1,55 @@
+{
+  "_meta": {
+    "surum": "0.3.0",
+    "kapsam": "Birlesik regresyon seti: eriskin + cocuk + Tier-0 duzeltme senaryolari. KURGU vakalar.",
+    "uyari": "Gercek hasta verisi DEGIL. Motorun kural mantigini ve guvenlik duzeltmelerini test eder."
+  },
+  "vinyetler": [
+    { "id": "A01", "kategori": "eriskin_hayati", "kirmizi": true, "beklenen": "hayati_tehdit", "aciklama": "Sessiz akciger -> hayati", "vaka": { "yas_grubu": "eriskin", "kirmizi_bayrak": ["RF_SESSIZ_AKCIGER"], "parametreler": { "P_KONUSMA": "kisa_cumleler" } } },
+    { "id": "A02", "kategori": "eriskin_hayati", "kirmizi": true, "beklenen": "hayati_tehdit", "aciklama": "Konusamiyor -> hayati", "vaka": { "yas_grubu": "eriskin", "parametreler": { "P_KONUSMA": "konusamiyor" } } },
+    { "id": "A03", "kategori": "eriskin_hayati", "kirmizi": true, "beklenen": "hayati_tehdit", "aciklama": "Bilinc konfuzyon -> hayati", "vaka": { "yas_grubu": "eriskin", "parametreler": { "P_BILINC": "konfuzyon", "P_NABIZ": 95 } } },
+    { "id": "A04", "kategori": "eriskin_hayati", "kirmizi": true, "beklenen": "hayati_tehdit", "aciklama": "SaO2 %86 -> terfi", "vaka": { "yas_grubu": "eriskin", "parametreler": { "P_SAO2": 86 } } },
+    { "id": "A05", "kategori": "eriskin_hayati", "kirmizi": true, "beklenen": "hayati_tehdit", "aciklama": "PaCO2 50 -> terfi", "vaka": { "yas_grubu": "eriskin", "parametreler": { "P_PACO2": 50 } } },
+    { "id": "A06", "kategori": "eriskin_hayati", "kirmizi": true, "beklenen": "hayati_tehdit", "aciklama": "Kardiyak gogus agrisi -> astim disi acil", "vaka": { "yas_grubu": "eriskin", "kirmizi_bayrak": ["RF_GOGUS_AGRISI_KARDIYAK"], "parametreler": {} } },
+    { "id": "A07", "kategori": "eriskin_agir", "beklenen": "agir", "aciklama": "Nabiz 130 -> agir", "vaka": { "yas_grubu": "eriskin", "parametreler": { "P_NABIZ": 130 } } },
+    { "id": "A08", "kategori": "eriskin_agir", "beklenen": "agir", "aciklama": "Solunum 34 -> agir", "vaka": { "yas_grubu": "eriskin", "parametreler": { "P_SOLUNUM_HIZI": 34, "P_NABIZ": 90 } } },
+    { "id": "A09", "kategori": "eriskin_agir", "beklenen": "agir", "aciklama": "PEF %50 -> agir", "vaka": { "yas_grubu": "eriskin", "parametreler": { "P_PEF": 50, "P_KONUSMA": "kisa_cumleler" } } },
+    { "id": "A10", "kategori": "eriskin_agir", "beklenen": "agir", "aciklama": "Dinlenmede nefes darligi -> agir", "vaka": { "yas_grubu": "eriskin", "parametreler": { "P_NEFES_DARLIGI": "dinlenmede" } } },
+    { "id": "A11", "kategori": "eriskin_orta", "beklenen": "orta", "aciklama": "Kisa cumleler -> orta", "vaka": { "yas_grubu": "eriskin", "parametreler": { "P_KONUSMA": "kisa_cumleler", "P_NABIZ": 90 } } },
+    { "id": "A12", "kategori": "eriskin_orta", "beklenen": "orta", "aciklama": "SaO2 %93 -> orta", "vaka": { "yas_grubu": "eriskin", "parametreler": { "P_SAO2": 93 } } },
+    { "id": "A13", "kategori": "eriskin_orta", "beklenen": "orta", "aciklama": "Nabiz 110 -> orta", "vaka": { "yas_grubu": "eriskin", "parametreler": { "P_NABIZ": 110 } } },
+    { "id": "A14", "kategori": "eriskin_hafif", "beklenen": "hafif", "aciklama": "Eforla + cumleler + nabiz 88 -> hafif", "vaka": { "yas_grubu": "eriskin", "parametreler": { "P_NEFES_DARLIGI": "eforla", "P_KONUSMA": "cumleler", "P_NABIZ": 88 } } },
+    { "id": "A15", "kategori": "eriskin_hafif", "beklenen": "hafif", "aciklama": "PEF %90 -> hafif", "vaka": { "yas_grubu": "eriskin", "parametreler": { "P_PEF": 90, "P_HISILTI": "ekspiryum_sonu" } } },
+    { "id": "A16", "kategori": "eriskin_risk", "beklenen": "agir", "aciklama": "Orta + entubasyon oykusu -> agir", "vaka": { "yas_grubu": "eriskin", "parametreler": { "P_KONUSMA": "kisa_cumleler", "P_NABIZ": 110 }, "risk_faktorleri": ["RISK_ENTUBASYON_OYKU"] } },
+    { "id": "A17", "kategori": "eriskin_risk", "beklenen": "orta", "aciklama": "Hafif + son yil yatis -> orta", "vaka": { "yas_grubu": "eriskin", "parametreler": { "P_NEFES_DARLIGI": "eforla", "P_NABIZ": 88 }, "risk_faktorleri": ["RISK_SON_YIL_YATIS"] } },
+    { "id": "A18", "kategori": "eriskin_belirsiz", "beklenen": "belirsiz", "aciklama": "Parametre yok -> belirsiz", "vaka": { "yas_grubu": "eriskin", "parametreler": {} } },
+    { "id": "A19", "kategori": "eriskin_agir", "beklenen": "agir", "aciklama": "Cogu hafif ama konusma=kelimeler -> agir", "vaka": { "yas_grubu": "eriskin", "parametreler": { "P_NEFES_DARLIGI": "eforla", "P_NABIZ": 85, "P_KONUSMA": "kelimeler" } } },
+    { "id": "A20", "kategori": "eriskin_hayati", "kirmizi": true, "beklenen": "hayati_tehdit", "aciklama": "Yardimci kas paradoks -> hayati", "vaka": { "yas_grubu": "eriskin", "parametreler": { "P_YARDIMCI_KAS": "paradoks", "P_NABIZ": 110, "P_HISILTI": "belirgin" } } },
+
+    { "id": "C01", "kategori": "cocuk_hayati", "kirmizi": true, "beklenen": "hayati_tehdit", "aciklama": "Bebek beslenmeyi kesiyor -> hayati", "vaka": { "yas_grubu": "cocuk", "yas_ay": 8, "kirmizi_bayrak": ["RF_BESLENME_KESILMESI"], "parametreler": {} } },
+    { "id": "C02", "kategori": "cocuk_agir", "beklenen": "agir", "aciklama": "Cocuk SaO2 %91 -> agir", "vaka": { "yas_grubu": "cocuk", "yas_ay": 48, "parametreler": { "P_SAO2": 91 } } },
+    { "id": "C03", "kategori": "cocuk_hayati", "kirmizi": true, "beklenen": "hayati_tehdit", "aciklama": "Cocuk SaO2 %89 -> terfi", "vaka": { "yas_grubu": "cocuk", "yas_ay": 48, "parametreler": { "P_SAO2": 89 } } },
+    { "id": "C04", "kategori": "cocuk_orta", "beklenen": "orta", "aciklama": "Cocuk SaO2 %93 -> orta", "vaka": { "yas_grubu": "cocuk", "yas_ay": 48, "parametreler": { "P_SAO2": 93 } } },
+    { "id": "C05", "kategori": "cocuk_orta", "beklenen": "orta", "aciklama": "3 yas RR 45 > 40 -> orta", "vaka": { "yas_grubu": "cocuk", "yas_ay": 36, "parametreler": { "P_SOLUNUM_HIZI": 45 } } },
+    { "id": "C06", "kategori": "cocuk_hafif", "beklenen": "hafif", "aciklama": "3 yas RR 38 < 40 -> hafif", "vaka": { "yas_grubu": "cocuk", "yas_ay": 36, "parametreler": { "P_SOLUNUM_HIZI": 38 } } },
+    { "id": "C07", "kategori": "cocuk_orta", "beklenen": "orta", "aciklama": "6 ay RR 55 > 50 -> orta", "vaka": { "yas_grubu": "cocuk", "yas_ay": 6, "parametreler": { "P_SOLUNUM_HIZI": 55 } } },
+    { "id": "C08", "kategori": "cocuk_orta", "beklenen": "orta", "aciklama": "7 yas RR 32 > 30 -> orta", "vaka": { "yas_grubu": "cocuk", "yas_ay": 84, "parametreler": { "P_SOLUNUM_HIZI": 32 } } },
+    { "id": "C09", "kategori": "cocuk_belirsiz", "beklenen": "belirsiz", "aciklama": "4 yas yalniz PEF -> guvenilmez -> belirsiz", "vaka": { "yas_grubu": "cocuk", "yas_ay": 48, "parametreler": { "P_PEF": 50 } } },
+    { "id": "C10", "kategori": "cocuk_orta", "beklenen": "orta", "aciklama": "7 yas PEF 70 -> orta", "vaka": { "yas_grubu": "cocuk", "yas_ay": 84, "parametreler": { "P_PEF": 70 } } },
+    { "id": "C11", "kategori": "cocuk_belirsiz", "beklenen": "belirsiz", "aciklama": "GUVENLIK: cocuk RR 50 ama YAS YOK -> belirsiz", "vaka": { "yas_grubu": "cocuk", "parametreler": { "P_SOLUNUM_HIZI": 50 } } },
+    { "id": "C12", "kategori": "cocuk_hayati", "kirmizi": true, "beklenen": "hayati_tehdit", "aciklama": "Cocuk siyanoz -> hayati", "vaka": { "yas_grubu": "cocuk", "yas_ay": 60, "kirmizi_bayrak": ["RF_SIYANOZ"], "parametreler": {} } },
+    { "id": "C13", "kategori": "cocuk_agir", "beklenen": "agir", "aciklama": "Cocuk kelime kelime konusma -> agir", "vaka": { "yas_grubu": "cocuk", "yas_ay": 72, "parametreler": { "P_KONUSMA": "kelimeler" } } },
+    { "id": "C14", "kategori": "cocuk_agir", "beklenen": "agir", "aciklama": "Cocuk dinlenmede nefes darligi -> agir", "vaka": { "yas_grubu": "cocuk", "yas_ay": 60, "parametreler": { "P_NEFES_DARLIGI": "dinlenmede" } } },
+    { "id": "C15", "kategori": "cocuk_orta", "beklenen": "orta", "aciklama": "3 yas huzursuz + RR 45 -> orta", "vaka": { "yas_grubu": "cocuk", "yas_ay": 36, "parametreler": { "P_BILINC": "huzursuz", "P_SOLUNUM_HIZI": 45 } } },
+
+    { "id": "T03a", "kategori": "tier0_03_nabiz", "beklenen": "hafif", "aciklama": "0.3 - 2 yas sakin cocuk nabiz 120: fizyolojik, eriskinde 'orta' olurdu -> hafif", "vaka": { "yas_grubu": "cocuk", "yas_ay": 24, "parametreler": { "P_NABIZ": 120 } } },
+    { "id": "T03b", "kategori": "tier0_03_nabiz", "beklenen": "orta", "aciklama": "0.3 - 8 yas cocuk nabiz 130 > yas ust siniri (120) -> orta", "vaka": { "yas_grubu": "cocuk", "yas_ay": 96, "parametreler": { "P_NABIZ": 130 } } },
+    { "id": "T03c", "kategori": "tier0_03_nabiz", "beklenen": "agir", "aciklama": "0.3 - 8 yas cocuk nabiz 145 belirgin tasikardi -> agir", "vaka": { "yas_grubu": "cocuk", "yas_ay": 96, "parametreler": { "P_NABIZ": 145 } } },
+    { "id": "T03d", "kategori": "tier0_03_nabiz", "beklenen": "belirsiz", "aciklama": "0.3 - cocuk nabiz 130 ama YAS YOK -> eriskin esigi uygulanmaz -> belirsiz", "vaka": { "yas_grubu": "cocuk", "parametreler": { "P_NABIZ": 130 } } },
+
+    { "id": "T05a", "kategori": "tier0_05_solunum", "beklenen": "orta", "aciklama": "0.5 - eriskin solunum 27 (25-30 bandi) -> orta (eskiden hafif idi)", "vaka": { "yas_grubu": "eriskin", "parametreler": { "P_SOLUNUM_HIZI": 27 } } },
+    { "id": "T05b", "kategori": "tier0_05_solunum", "beklenen": "agir", "aciklama": "0.5 - 3 yas RR 65 (>40*1.5) pediatrik distres -> agir", "vaka": { "yas_grubu": "cocuk", "yas_ay": 36, "parametreler": { "P_SOLUNUM_HIZI": 65 } } },
+
+    { "id": "T0_hafif", "kategori": "tier0_baz", "beklenen": "hafif", "aciklama": "Tam hafif tablo (over-triage referansi)", "vaka": { "yas_grubu": "eriskin", "parametreler": { "P_NEFES_DARLIGI": "eforla", "P_KONUSMA": "cumleler", "P_NABIZ": 80, "P_SAO2": 98 } } }
+  ]
+}

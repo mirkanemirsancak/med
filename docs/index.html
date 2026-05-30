@@ -5,26 +5,33 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Astim Triyaj</title>
   <style>
-    :root { --bg:#0f1115; --card:#1a1d24; --line:#2a2f3a; --txt:#e7eaf0; --mut:#9aa3b2; --acc:#4f86f7; }
+    :root { --bg:#0f1115; --card:#1a1d24; --line:#2a2f3a; --txt:#e7eaf0; --mut:#9aa3b2; --acc:#4f86f7; --err:#e5484d; }
     * { box-sizing: border-box; }
     body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
            background:var(--bg); color:var(--txt); line-height:1.5; }
     .wrap { max-width: 920px; margin: 0 auto; padding: 24px 16px 64px; }
     h1 { font-size: 1.5rem; margin: 0 0 4px; }
-    .sub { color: var(--mut); margin: 0 0 24px; font-size: .9rem; }
+    .sub { color: var(--mut); margin: 0 0 16px; font-size: .9rem; }
     .grid { display:grid; grid-template-columns: 1fr 1fr; gap:16px; }
     @media (max-width:720px){ .grid { grid-template-columns: 1fr; } }
     .card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:16px; }
     .card h2 { font-size:1rem; margin:0 0 12px; }
     label { display:block; font-size:.85rem; color:var(--mut); margin:10px 0 4px; }
-    select, input[type=number], input[type=text] {
+    select, input[type=number] {
       width:100%; padding:8px 10px; background:#0f1218; color:var(--txt);
       border:1px solid var(--line); border-radius:8px; font-size:.95rem; }
+    input.gecersiz { border-color:var(--err); }
+    .alanHata { color:var(--err); font-size:.78rem; margin-top:3px; }
     .check { display:flex; gap:8px; align-items:flex-start; margin:6px 0; font-size:.88rem; }
     .check input { margin-top:3px; }
     .btn { margin-top:20px; background:var(--acc); color:#fff; border:0; padding:12px 20px;
            border-radius:10px; font-size:1rem; cursor:pointer; width:100%; }
     .btn:hover { filter:brightness(1.08); }
+    .modbar { display:flex; gap:6px; background:#0f1218; border:1px solid var(--line);
+              border-radius:10px; padding:4px; width:max-content; margin-bottom:16px; }
+    .modbar button { background:transparent; border:0; color:var(--mut); padding:8px 16px;
+              border-radius:7px; cursor:pointer; font-size:.9rem; }
+    .modbar button.aktif { background:var(--acc); color:#fff; }
     .result { margin-top:24px; border-radius:12px; padding:18px; border:1px solid var(--line); }
     .badge { display:inline-block; font-weight:700; padding:6px 14px; border-radius:999px; font-size:1.05rem; }
     .hayati_tehdit { background:#3a0d12; border:1px solid #7f1d2b; }
@@ -43,7 +50,10 @@
     li { font-size:.88rem; color:var(--mut); }
     .msg { font-size:1.02rem; }
     .warn { background:#1f2530; border:1px dashed #3a4452; padding:10px 12px;
-            border-radius:8px; color:var(--mut); font-size:.8rem; margin-bottom:20px; }
+            border-radius:8px; color:var(--mut); font-size:.82rem; margin-bottom:16px; }
+    .acil112 { color:#ffb4b4; font-weight:600; }
+    .hataKutu { background:#3a0d12; border:1px solid #7f1d2b; color:#ffd7d7;
+                padding:10px 12px; border-radius:8px; margin-top:16px; font-size:.88rem; }
     footer { color:var(--mut); font-size:.75rem; margin-top:32px; text-align:center; }
   </style>
 </head>
@@ -51,9 +61,19 @@
 <div class="wrap">
   <h1>Astim On-Degerlendirme / Triyaj</h1>
   <p class="sub">Yapilandirilmis vaka -> aciliyet sinifi + yonlendirme. Deterministik kural motoru (tarayicida calisir).</p>
+
+  <!-- 0.6 - Muafiyet + her zaman gorunur 112 -->
   <div class="warn">
     Bu arac <b>TANI KOYMAZ</b> ve tedavi onermez; yalnizca aciliyet duzeyini belirler.
-    Belirsizlikte aciliyeti yukseltir (fail-safe). Gercek karar hekime aittir. Vinyetler kurgudur.
+    <b>Bu bir tibbi cihaz degildir.</b>
+    Belirsizlikte aciliyeti yukseltir (fail-safe). Gercek karar hekime aittir.
+    <div class="acil112" style="margin-top:6px">Acil bir durumdan supheleniyorsaniz sonucu beklemeden 112'yi arayin.</div>
+  </div>
+
+  <!-- 0.1 - Hasta / Hekim mod anahtari -->
+  <div class="modbar">
+    <button type="button" id="modHasta" class="aktif" onclick="modDegistir('hasta')">Hasta gorunumu</button>
+    <button type="button" id="modHekim" onclick="modDegistir('hekim')">Hekim gorunumu</button>
   </div>
 
   <form id="triyajForm">
@@ -65,7 +85,7 @@
           <option value="eriskin">Eriskin</option>
           <option value="cocuk">Cocuk</option>
         </select>
-        <label>Yas (ay) <span style="opacity:.7">- cocukta solunum hizi/PEF icin gerekli</span></label>
+        <label>Yas (ay) <span style="opacity:.7">- cocukta solunum hizi/nabiz/PEF icin gerekli</span></label>
         <input type="number" name="yas_ay" min="0" placeholder="orn. 36">
         <h2 style="margin-top:18px">Sayisal olcumler</h2>
         <div id="sayisalAlan"></div>
@@ -90,276 +110,48 @@
     <button class="btn" type="submit">Triyaj yap</button>
   </form>
 
+  <div id="hataAlan"></div>
   <div id="sonucAlan"></div>
 
   <footer>Kaynak: Turk Toraks Dernegi Astim Rehberi (GINA temelli) · acik kaynak prototip</footer>
 </div>
 
+<script src="triyaj_motor.js"></script>
 <script>
-// ===========================================================================
-// KURAL SETI (triyaj_kurallari_v1.json'dan gomulu)
-// ===========================================================================
-const KURALLAR = {
-  "kirmizi_bayraklar": {
-    "astim_hayati_tehdit": [
-      { "kod": "RF_SESSIZ_AKCIGER", "tr": "Hisilti duyulmuyor / 'sessiz akciger'" },
-      { "kod": "RF_SIYANOZ", "tr": "Dudak veya ciltte morarma" },
-      { "kod": "RF_KONFUZYON", "tr": "Bilinc bulanikligi / uykuya egilim / konfuzyon" },
-      { "kod": "RF_KELIME_KONUSMA", "tr": "Yalnizca tek tek kelimelerle konusabiliyor" },
-      { "kod": "RF_PARADOKS_SOLUNUM", "tr": "Torako-abdominal paradoks hareket" },
-      { "kod": "RF_BRADIKARDI", "tr": "Nabizda dusme (bradikardi)" },
-      { "kod": "RF_SAO2_DUSUK", "tr": "SaO2 < %90", "terfi": { "parametre": "P_SAO2", "op": "<", "esik": 90 } },
-      { "kod": "RF_PACO2_YUKSEK", "tr": "PaCO2 > 45 mmHg", "terfi": { "parametre": "P_PACO2", "op": ">", "esik": 45 } },
-      { "kod": "RF_BESLENME_KESILMESI", "tr": "Bebek nefes darligindan beslenmeyi/emmeyi kesiyor" }
-    ],
-    "astim_disi_acil": {
-      "liste": [
-        { "kod": "RF_GOGUS_AGRISI_KARDIYAK", "tr": "Baskili/sikistirici gogus agrisi, kola/ceneye yayilma, soguk terleme" },
-        { "kod": "RF_ANI_NEFES_DARLIGI_TEK_TARAF", "tr": "Ani baslayan nefes darligi + tek tarafli gogus agrisi" },
-        { "kod": "RF_BACAK_SISLIK_AGRI", "tr": "Tek bacakta sislik/agri + nefes darligi" },
-        { "kod": "RF_YABANCI_CISIM", "tr": "Ani bogulma / yabanci cisim aspirasyonu suphesi" }
-      ]
-    }
-  },
-  "olumcul_atak_risk_faktorleri": {
-    "liste": [
-      { "kod": "RISK_ENTUBASYON_OYKU", "tr": "Gecmiste entubasyon / mekanik ventilasyon gerektiren atak" },
-      { "kod": "RISK_SON_YIL_YATIS", "tr": "Son 1 yilda astim nedeniyle yatis veya acil basvuru" },
-      { "kod": "RISK_ORAL_STEROID", "tr": "Halen oral steroid kullaniyor veya yeni birakti" },
-      { "kod": "RISK_IKS_YOK", "tr": "Inhaler steroid kullanmiyor veya yeni birakti" },
-      { "kod": "RISK_ASIRI_SABA", "tr": "Asiri kurtarici kullanimi (>1 kutu/ay salbutamol)" },
-      { "kod": "RISK_PSIKOSOSYAL", "tr": "Psikiyatrik hastalik veya psikososyal sorun" },
-      { "kod": "RISK_UYUMSUZLUK", "tr": "Tedaviye uyumsuzluk" },
-      { "kod": "RISK_DUSUK_SES", "tr": "Dusuk sosyoekonomik duzey" },
-      { "kod": "RISK_KOMORBIDITE", "tr": "Eslik eden hastalik (kardiyovaskuler/diger akciger)" }
-    ]
-  },
-  "yonlendirme_haritasi": {
-    "hayati_tehdit": { "hasta_mesaj": "Acil tibbi yardim alin (112 / en yakin acil servis).", "hekim_etiket": "Hayati tehdit eden atak - derhal mudahale" },
-    "agir":          { "hasta_mesaj": "Vakit kaybetmeden acil servise basvurun.", "hekim_etiket": "Agir atak - hastane kosullari" },
-    "orta":          { "hasta_mesaj": "Bugun bir hekime/acile basvurun.", "hekim_etiket": "Orta atak - yakin degerlendirme" },
-    "hafif":         { "hasta_mesaj": "Yakin zamanda hekiminize danisin; belirtiler kotuleserse acile basvurun.", "hekim_etiket": "Hafif atak - ayaktan degerlendirilebilir" },
-    "belirsiz":      { "hasta_mesaj": "Belirtileriniz net degerlendirilemedi; guvenli olmasi icin bir hekime danisin.", "hekim_etiket": "Yetersiz veri - guvenli tarafa yuvarlandi" }
-  }
-};
-
-// ===========================================================================
-// MOTOR (triyaj_motoru.py'nin birebir JS portu)
-// ===========================================================================
-const SIRA = ["hafif", "orta", "agir", "hayati_tehdit"];
-
-const KATEGORIK_SINIF = {
-  P_NEFES_DARLIGI: { eforla:"hafif", konusurken:"orta", dinlenmede:"agir", konusamaz:"hayati_tehdit" },
-  P_KONUSMA:       { cumleler:"hafif", kisa_cumleler:"orta", kelimeler:"agir", konusamiyor:"hayati_tehdit" },
-  P_BILINC:        { sakin:"hafif", huzursuz:"orta", konfuzyon:"hayati_tehdit" },
-  P_YARDIMCI_KAS:  { yok:"hafif", var:"orta", paradoks:"hayati_tehdit" },
-  P_HISILTI:       { ekspiryum_sonu:"hafif", belirgin:"orta", sessiz:"hayati_tehdit" },
-};
-
-function cocukMu(vaka){ return vaka.yas_grubu === "cocuk"; }
-
-function cocukSolunumUstSinir(yasAy){
-  if (yasAy < 2)  return 60;
-  if (yasAy < 12) return 50;
-  if (yasAy < 72) return 40;
-  return 30;
-}
-
-function sinifNabiz(v){ if (v > 120) return "agir"; if (v >= 100) return "orta"; return "hafif"; }
-
-function sinifSolunumHizi(v, vaka){
-  if (cocukMu(vaka)){
-    const ya = vaka.yas_ay;
-    if (ya === undefined || ya === null) return null; // yas yoksa cocukta yorumlanamaz
-    const ust = cocukSolunumUstSinir(ya);
-    return v > ust ? "orta" : "hafif";
-  }
-  if (v > 30) return "agir";
-  return "hafif";
-}
-
-function sinifPef(v, vaka){
-  if (cocukMu(vaka)){
-    const ya = vaka.yas_ay;
-    if (ya === undefined || ya === null || ya < 60) return null; // <5 yas guvenilmez
-  }
-  if (v < 60) return "agir";
-  if (v <= 80) return "orta";
-  return "hafif";
-}
-
-function sinifSao2(v, vaka){
-  if (cocukMu(vaka)){
-    if (v > 95) return "hafif";
-    if (v >= 92) return "orta";
-    return "agir"; // 90-91 (90 alti zaten terfi -> hayati)
-  }
-  if (v < 90) return "agir";
-  if (v <= 95) return "orta";
-  return "hafif";
-}
-
-const SAYISAL_SINIF = {
-  P_NABIZ:        (v) => sinifNabiz(v),
-  P_SOLUNUM_HIZI: (v, vaka) => sinifSolunumHizi(v, vaka),
-  P_PEF:          (v, vaka) => sinifPef(v, vaka),
-  P_SAO2:         (v, vaka) => sinifSao2(v, vaka),
-};
-
-function gecerliKodlar(){
-  const m = {};
-  KURALLAR.kirmizi_bayraklar.astim_hayati_tehdit.forEach(b => m[b.kod] = b.tr);
-  KURALLAR.kirmizi_bayraklar.astim_disi_acil.liste.forEach(b => m[b.kod] = b.tr);
-  return m;
-}
-
-function kirmiziBayrakKontrol(vaka){
-  const gecerli = gecerliKodlar();
-  const tetiklenen = [];
-  (vaka.kirmizi_bayrak || []).forEach(kod => {
-    if (gecerli[kod]) tetiklenen.push([kod, gecerli[kod]]);
-  });
-  return tetiklenen;
-}
-
-function kirmiziTerfi(vaka){
-  const params = vaka.parametreler || {};
-  const tanimlar = KURALLAR.kirmizi_bayraklar.astim_hayati_tehdit
-    .concat(KURALLAR.kirmizi_bayraklar.astim_disi_acil.liste);
-  const terfiEden = [];
-  tanimlar.forEach(b => {
-    const k = b.terfi;
-    if (!k || !(k.parametre in params)) return;
-    const deger = parseFloat(params[k.parametre]);
-    if (isNaN(deger)) return;
-    if ((k.op === "<" && deger < k.esik) || (k.op === ">" && deger > k.esik))
-      terfiEden.push(b.kod);
-  });
-  return terfiEden;
-}
-
-function atakAgirliginiBelirle(vaka){
-  const params = vaka.parametreler || {};
-  let enAgirIdx = -1, enAgir = null, siniflanan = 0;
-  const gerekce = [];
-  for (const [kod, deger] of Object.entries(params)){
-    let sinif = null;
-    if (kod in KATEGORIK_SINIF){
-      sinif = KATEGORIK_SINIF[kod][deger] || null;
-    } else if (kod in SAYISAL_SINIF){
-      const sayi = parseFloat(deger);
-      sinif = isNaN(sayi) ? null : SAYISAL_SINIF[kod](sayi, vaka);
-    }
-    if (sinif === null) continue;
-    siniflanan++;
-    const idx = SIRA.indexOf(sinif);
-    gerekce.push(`${kod}=${deger} -> ${sinif}`);
-    if (idx > enAgirIdx){ enAgirIdx = idx; enAgir = sinif; }
-  }
-  return { enAgir, gerekce, siniflanan };
-}
-
-function riskEskalasyonu(sinif, vaka){
-  const gecerli = new Set(KURALLAR.olumcul_atak_risk_faktorleri.liste.map(r => r.kod));
-  const aktif = (vaka.risk_faktorleri || []).filter(k => gecerli.has(k));
-  if (aktif.length === 0 || sinif === null) return { yeni: sinif, aktif, yukseldi: false };
-  if (sinif === "hafif" || sinif === "orta"){
-    const idx = SIRA.indexOf(sinif);
-    const yeni = SIRA[Math.min(idx + 1, SIRA.indexOf("agir"))];
-    return { yeni, aktif, yukseldi: yeni !== sinif };
-  }
-  return { yeni: sinif, aktif, yukseldi: false };
-}
-
-function triyaj(vakaGirdi){
-  const sonuc = { adimlar: [] };
-  let vaka = vakaGirdi;
-
-  // 1) Kirmizi bayrak (once sayisal terfi)
-  const terfi = kirmiziTerfi(vaka);
-  if (terfi.length){
-    vaka = Object.assign({}, vaka);
-    vaka.kirmizi_bayrak = (vaka.kirmizi_bayrak || []).concat(terfi);
-  }
-  const bayraklar = kirmiziBayrakKontrol(vaka);
-  if (bayraklar.length){
-    sonuc.sinif = "hayati_tehdit";
-    sonuc.kirmizi_bayrak = bayraklar;
-    if (terfi.length) sonuc.adimlar.push(`Sayisal olcum esigi asti -> kirmizi bayraga terfi: ${terfi.join(", ")}`);
-    sonuc.adimlar.push("Kirmizi bayrak tetiklendi -> dogrudan ACIL, diger adimlar atlandi.");
-    sonuc.yonlendirme = KURALLAR.yonlendirme_haritasi.hayati_tehdit;
-    return sonuc;
-  }
-
-  // 2) Atak agirligi
-  if (vaka.yas_grubu === "cocuk"){
-    const ya = vaka.yas_ay;
-    if ("P_PEF" in (vaka.parametreler || {}) && (ya === undefined || ya === null || ya < 60))
-      sonuc.adimlar.push("Cocuk <5 yas (veya yas bilinmiyor): PEF guvenilir degil, dikkate alinmadi.");
-  }
-  const { enAgir, gerekce, siniflanan } = atakAgirliginiBelirle(vaka);
-  sonuc.agirlik_gerekce = gerekce;
-
-  // Fail-safe: hic parametre siniflanamadi -> belirsiz
-  if (siniflanan === 0){
-    sonuc.sinif = "belirsiz";
-    sonuc.adimlar.push("Yeterli parametre yok -> guvenli tarafa yuvarlandi (belirsiz).");
-    sonuc.yonlendirme = KURALLAR.yonlendirme_haritasi.belirsiz;
-    return sonuc;
-  }
-  sonuc.adimlar.push(`Atak agirligi (birkaci yeterli, en agir kazanir): ${enAgir}`);
-
-  // 3) Risk eskalasyonu
-  const { yeni, aktif, yukseldi } = riskEskalasyonu(enAgir, vaka);
-  if (aktif.length) sonuc.aktif_risk_faktorleri = aktif;
-  if (yukseldi) sonuc.adimlar.push(`Risk faktoru nedeniyle esik dusuruldu: ${enAgir} -> ${yeni}`);
-
-  sonuc.sinif = yeni;
-  sonuc.yonlendirme = KURALLAR.yonlendirme_haritasi[yeni];
-  return sonuc;
-}
-
-// ===========================================================================
-// ARAYUZ (formu kuraldan uret, sonucu goster)
-// ===========================================================================
-const KATEGORIK_ETIKET = {
-  P_NEFES_DARLIGI: { eforla:"Eforla (yatabilir) - hafif", konusurken:"Konusurken (oturmayi tercih) - orta", dinlenmede:"Dinlenmede, one egilmis - agir", konusamaz:"Dinlenmede, konusamaz - hayati" },
-  P_KONUSMA:       { cumleler:"Cumlelerle - hafif", kisa_cumleler:"Kisa cumlelerle - orta", kelimeler:"Kelimelerle - agir", konusamiyor:"Konusamiyor - hayati" },
-  P_BILINC:        { sakin:"Sakin - hafif", huzursuz:"Huzursuz - orta", konfuzyon:"Konfuzyon / uykuya egilim - hayati" },
-  P_YARDIMCI_KAS:  { yok:"Yok - hafif", var:"Var - orta", paradoks:"Paradoks hareket - hayati" },
-  P_HISILTI:       { ekspiryum_sonu:"Ekspiryum sonu - hafif", belirgin:"Belirgin - orta", sessiz:"Sessiz akciger - hayati" },
-};
-const SAYISAL_ALAN = {
-  P_SOLUNUM_HIZI: ["Solunum hizi", "/dk", "cocukta yasa bagli; eriskinde >30 agir"],
-  P_NABIZ:        ["Nabiz", "/dk", "100-120 orta, >120 agir"],
-  P_SAO2:         ["SaO2 (oda havasi)", "%", "<90 acil; cocukta <92 tedbirli"],
-  P_PEF:          ["PEF (% beklenen/en iyi)", "%", "<5 yas cocukta guvenilir degil"],
-  P_PACO2:        ["PaCO2", "mmHg", ">45 acil (terfi)"],
-};
+const M = window.TriyajMotor;
+const { KURALLAR, KATEGORIK_ETIKET, SAYISAL_ALAN } = M;
+let MOD = "hasta"; // 0.1 - varsayilan Hasta
 
 function esc(s){ return String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
-function baslik(kod){ return kod.replace("P_","").replace(/_/g," ").toLowerCase().replace(/\b\w/g, c=>c.toUpperCase()); }
+
+function gecerliKirmiziListe(){
+  return KURALLAR.kirmizi_bayraklar.astim_hayati_tehdit
+    .concat(KURALLAR.kirmizi_bayraklar.astim_disi_acil.liste);
+}
 
 function formuKur(){
+  // 0.2 - PaCO2 yalniz hekim modunda; alanlar mod degisince yeniden cizilir.
   let h = "";
-  for (const [kod, [etiket, birim, ipucu]] of Object.entries(SAYISAL_ALAN)){
-    h += `<label>${etiket} (${birim}) <span style="opacity:.6">- ${ipucu}</span></label>
-          <input type="number" step="any" name="${kod}">`;
+  for (const [kod, meta] of Object.entries(SAYISAL_ALAN)){
+    if (meta.hekimModu && MOD !== "hekim") continue;
+    h += `<label>${esc(meta.tr)} (${esc(meta.birim)}) <span style="opacity:.6">- ${esc(meta.ipucu)}</span></label>
+          <input type="number" step="any" name="${kod}" data-kod="${kod}">
+          <div class="alanHata" id="hata_${kod}"></div>`;
   }
   document.getElementById("sayisalAlan").innerHTML = h;
 
   h = "";
-  for (const [kod, secenekler] of Object.entries(KATEGORIK_ETIKET)){
-    h += `<label>${baslik(kod)}</label><select name="${kod}"><option value="">- secilmedi -</option>`;
-    for (const [tk, et] of Object.entries(secenekler)) h += `<option value="${tk}">${et}</option>`;
+  for (const [kod, meta] of Object.entries(KATEGORIK_ETIKET)){
+    h += `<label>${esc(meta.tr)}</label><select name="${kod}"><option value="">- secilmedi -</option>`;
+    for (const [tk, et] of Object.entries(meta.secenek)) h += `<option value="${tk}">${esc(et.tr)}</option>`;
     h += `</select>`;
   }
   document.getElementById("kategorikAlan").innerHTML = h;
 
   h = "";
-  gecerliKirmiziListe().forEach(([kod, tr]) => {
-    h += `<div class="check"><input type="checkbox" name="kirmizi" value="${kod}" id="k_${kod}">
-          <label for="k_${kod}" style="margin:0;color:var(--txt)">${esc(tr)}</label></div>`;
+  gecerliKirmiziListe().forEach(b => {
+    h += `<div class="check"><input type="checkbox" name="kirmizi" value="${b.kod}" id="k_${b.kod}">
+          <label for="k_${b.kod}" style="margin:0;color:var(--txt)">${esc(b.tr)}</label></div>`;
   });
   document.getElementById("kirmiziAlan").innerHTML = h;
 
@@ -371,21 +163,28 @@ function formuKur(){
   document.getElementById("riskAlan").innerHTML = h;
 }
 
-function gecerliKirmiziListe(){
-  return KURALLAR.kirmizi_bayraklar.astim_hayati_tehdit.map(b => [b.kod, b.tr])
-    .concat(KURALLAR.kirmizi_bayraklar.astim_disi_acil.liste.map(b => [b.kod, b.tr]));
+function modDegistir(mod){
+  MOD = mod;
+  document.getElementById("modHasta").classList.toggle("aktif", mod === "hasta");
+  document.getElementById("modHekim").classList.toggle("aktif", mod === "hekim");
+  // formu yeniden kur (PaCO2 gizle/goster); onceki sonucu temizle
+  formuKur();
+  document.getElementById("sonucAlan").innerHTML = "";
+  document.getElementById("hataAlan").innerHTML = "";
 }
 
 function formdanVaka(form){
-  const vaka = { yas_grubu: form.yas_grubu.value, parametreler: {} };
-  const ya = form.yas_ay.value.trim();
+  const el = form.elements; // form.elements[name] hem tarayicida hem jsdom'da calisir
+  const vaka = { yas_grubu: el["yas_grubu"].value, parametreler: {} };
+  const ya = el["yas_ay"].value.trim();
   if (ya) vaka.yas_ay = parseInt(ya, 10);
   for (const kod of Object.keys(KATEGORIK_ETIKET)){
-    const v = form[kod].value;
+    const v = el[kod].value;
     if (v) vaka.parametreler[kod] = v;
   }
   for (const kod of Object.keys(SAYISAL_ALAN)){
-    const v = form[kod].value.trim();
+    if (!el[kod]) continue; // hekim-modu alani gizliyse formda yok
+    const v = el[kod].value.trim();
     if (v !== "") vaka.parametreler[kod] = parseFloat(v);
   }
   vaka.kirmizi_bayrak = [...form.querySelectorAll('input[name=kirmizi]:checked')].map(e => e.value);
@@ -395,28 +194,63 @@ function formdanVaka(form){
 
 function liste(arr, fn){ return (arr || []).map(fn).map(x => `<li>${x}</li>`).join(""); }
 
+// 0.1 - mod-duyarli sunum: hasta modunda klinik dil gizlenir
 function sonucGoster(sonuc){
   const y = sonuc.yonlendirme || {};
   let h = `<div class="result ${sonuc.sinif}">
     <span class="badge">${esc(sonuc.sinif.toUpperCase().replace(/_/g," "))}</span>
-    <h3>Hasta mesaji</h3><p class="msg">${esc(y.hasta_mesaj || "-")}</p>
-    <h3>Hekim etiketi</h3><p>${esc(y.hekim_etiket || "-")}</p>`;
-  if (sonuc.kirmizi_bayrak && sonuc.kirmizi_bayrak.length)
-    h += `<h3>Tetiklenen kirmizi bayraklar</h3><ul>${liste(sonuc.kirmizi_bayrak, b => `[${esc(b[0])}] ${esc(b[1])}`)}</ul>`;
-  if (sonuc.aktif_risk_faktorleri && sonuc.aktif_risk_faktorleri.length)
-    h += `<h3>Aktif risk faktorleri</h3><ul>${liste(sonuc.aktif_risk_faktorleri, esc)}</ul>`;
-  if (sonuc.agirlik_gerekce && sonuc.agirlik_gerekce.length)
-    h += `<h3>Agirlik gerekcesi</h3><ul>${liste(sonuc.agirlik_gerekce, esc)}</ul>`;
-  h += `<h3>Karar adimlari</h3><ul>${liste(sonuc.adimlar, esc)}</ul></div>`;
-  document.getElementById("sonucAlan").innerHTML = h;
-  document.getElementById("sonucAlan").scrollIntoView({ behavior:"smooth", block:"nearest" });
+    <h3>${MOD === "hasta" ? "Ne yapmalisiniz" : "Hasta mesaji"}</h3>
+    <p class="msg">${esc(y.hasta_mesaj || "-")}</p>`;
+
+  if (sonuc.kirmizi_bayrak && sonuc.kirmizi_bayrak.length){
+    // hasta modunda kod gosterme, sadece duz aciklama
+    h += `<h3>Dikkat gerektiren bulgular</h3><ul>${
+      liste(sonuc.kirmizi_bayrak, b => MOD === "hekim" ? `[${esc(b[0])}] ${esc(b[1])}` : esc(b[1]))}</ul>`;
+  }
+
+  if (MOD === "hekim"){
+    h += `<h3>Hekim etiketi</h3><p>${esc(y.hekim_etiket || "-")}</p>`;
+    if (sonuc.aktif_risk_faktorleri && sonuc.aktif_risk_faktorleri.length)
+      h += `<h3>Aktif risk faktorleri</h3><ul>${liste(sonuc.aktif_risk_faktorleri, esc)}</ul>`;
+    if (sonuc.agirlik_gerekce && sonuc.agirlik_gerekce.length)
+      h += `<h3>Agirlik gerekcesi</h3><ul>${liste(sonuc.agirlik_gerekce, esc)}</ul>`;
+    h += `<h3>Karar adimlari</h3><ul>${liste(sonuc.adimlar, esc)}</ul>`;
+    h += `<p style="color:var(--mut);font-size:.75rem;margin-top:12px">Kural seti surumu: ${esc(sonuc.surum || "?")}</p>`;
+  }
+  h += `</div>`;
+  const alan = document.getElementById("sonucAlan");
+  alan.innerHTML = h;
+  if (alan.scrollIntoView) alan.scrollIntoView({ behavior:"smooth", block:"nearest" });
+}
+
+// 0.4 - sinir disi girdi: triyaji calistirma, alan altinda uyari goster
+function hatalariGoster(hatalar){
+  document.querySelectorAll('.alanHata').forEach(e => e.textContent = "");
+  document.querySelectorAll('#sayisalAlan input').forEach(e => e.classList.remove("gecersiz"));
+  hatalar.forEach(hata => {
+    const inp = document.querySelector(`#sayisalAlan input[data-kod="${hata.kod}"]`);
+    if (inp) inp.classList.add("gecersiz");
+    const el = document.getElementById(`hata_${hata.kod}`);
+    if (el) el.textContent = hata.mesaj;
+  });
+  document.getElementById("hataAlan").innerHTML =
+    `<div class="hataKutu">Girdi makul aralik disinda; lutfen degerleri kontrol edin. Triyaj calistirilmadi.</div>`;
 }
 
 formuKur();
 document.getElementById("triyajForm").addEventListener("submit", e => {
   e.preventDefault();
   const vaka = formdanVaka(e.target);
-  sonucGoster(triyaj(vaka));
+  const hatalar = M.dogrula(vaka);            // 0.4
+  if (hatalar.length){
+    document.getElementById("sonucAlan").innerHTML = "";
+    hatalariGoster(hatalar);
+    return;
+  }
+  document.querySelectorAll('.alanHata').forEach(el => el.textContent = "");
+  document.querySelectorAll('#sayisalAlan input').forEach(el => el.classList.remove("gecersiz"));
+  document.getElementById("hataAlan").innerHTML = "";
+  sonucGoster(M.triyaj(vaka));
 });
 </script>
 </body>

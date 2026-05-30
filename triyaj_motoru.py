@@ -70,8 +70,28 @@ def cocuk_solunum_ust_sinir(yas_ay):
     if yas_ay < 72:  return 40   # 1-<6 yas (tablo: 1-5 yas <40)
     return 30                    # >=6 yas (tablo: 6-8 yas <30)
 
+def cocuk_nabiz_ust_sinir(yas_ay):
+    # 0.3 - Pediatrik tasikardi esigi (yaklasik). Referans: Fleming S ve ark.,
+    # Lancet 2011;377:1011-1018. Cocukta 100-120 fizyolojik olabilir; eriskin
+    # esigini cocuga uygulamak gizli guvenlik hatasidir. KLINIK ONAY BEKLER.
+    if yas_ay < 2:    return 180
+    if yas_ay < 12:   return 170
+    if yas_ay < 24:   return 150
+    if yas_ay < 60:   return 140
+    if yas_ay < 144:  return 120
+    return 110
+
 def sinif_nabiz(v, vaka):
-    # Tablo 6.2.8 ve 4.4.1 nabiz esikleri ayni.
+    # 0.3 - Nabiz artik yas-duyarli.
+    if _cocuk_mu(vaka):
+        yas_ay = vaka.get("yas_ay")
+        if yas_ay is None:
+            return None  # yas yoksa cocukta YORUMLANAMAZ; eriskin esigi UYGULANMAZ
+        ust = cocuk_nabiz_ust_sinir(yas_ay)
+        if v > ust * 1.15: return "agir"
+        if v > ust: return "orta"
+        return "hafif"
+    # eriskin (Tablo 4.4.1)
     if v > 120: return "agir"
     if v >= 100: return "orta"
     return "hafif"
@@ -82,11 +102,13 @@ def sinif_solunum_hizi(v, vaka):
         if yas_ay is None:
             return None  # yas yoksa cocukta YORUMLANAMAZ; eriskin esigi UYGULANMAZ
         ust = cocuk_solunum_ust_sinir(yas_ay)
+        # 0.5 - cocukta ust sinirin belirgin uzeri -> 'agir' bandi eklendi.
+        if v > ust * 1.5: return "agir"
         return "orta" if v > ust else "hafif"
-        # NOT: cocukta 'agir' RR esigi kaynakta TANIMSIZ -> klinik onay bekler.
-    # eriskin:
+    # eriskin: 0.5 - 'orta' bandi (25-30) eklendi. Esikler KLINIK ONAY BEKLER.
     if v > 30: return "agir"
-    return "hafif"  # DIKKAT: eriskinde hafif/orta numerik siniri kaynakta tanimsiz
+    if v >= 25: return "orta"
+    return "hafif"
 
 def sinif_pef(v, vaka):  # % beklenen veya kisisel en iyi
     # Rehber: PEF/spirometri 5 yas altinda GUVENILIR DEGIL -> kullanma.

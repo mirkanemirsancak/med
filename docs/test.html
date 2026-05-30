@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Triyaj - Vinyet Regresyon Testi</title>
+  <style>
+    body { background:#0f1115; color:#e7eaf0; font-family: ui-monospace, Menlo, Consolas, monospace; padding:24px; }
+    pre { white-space:pre-wrap; line-height:1.4; }
+    .gecti { color:#46c46a; } .kaldi { color:#e5484d; }
+  </style>
+</head>
+<body>
+  <h1 id="ozet">Vinyet regresyon testi calistiriliyor...</h1>
+  <pre id="cikti"></pre>
+  <script src="triyaj_motor.js"></script>
+  <script src="test_vinyet.js"></script>
+  <script>
+    fetch("vinyetler.json")
+      .then(r => r.json())
+      .then(data => {
+        const rapor = TriyajTest.testleriCalistir(TriyajMotor, data.vinyetler);
+        document.getElementById("cikti").textContent = TriyajTest.metniBicimle(rapor);
+        const ozet = document.getElementById("ozet");
+        ozet.textContent = rapor.gecti
+          ? `GECTI - ${rapor.dogru}/${rapor.toplam} isabet, kirmizi bayrak duyarlilik %${(100*rapor.rf.duyarlilik).toFixed(0)}`
+          : `KALDI - regresyon kapisi kapali`;
+        ozet.className = rapor.gecti ? "gecti" : "kaldi";
+      })
+      .catch(e => { document.getElementById("cikti").textContent = "Hata: " + e; });
+  </script>
+</body>
+</html>
