@@ -1,0 +1,38 @@
+{
+  "_meta": {
+    "surum": "0.2.0",
+    "kapsam": "ERISKIN vinyetler. Tablo 4.4.1 turevi KURGU vakalar.",
+    "uyari": "Gercek hasta verisi DEGIL. Motorun KURAL MANTIGINI test etmek icindir.",
+    "kapsanan": "hafif/orta/agir/hayati_tehdit + risk eskalasyonu + sayisal terfi + astim disi acil + belirsiz + en-agir-kazanir"
+  },
+  "vinyetler": [
+
+    { "id": "A01", "kategori": "eriskin_hayati", "etiket": ["red_flag"], "gold_turu": "rehber", "beklenen": "hayati_tehdit", "aciklama": "Sessiz akciger -> dogrudan hayati (kirmizi bayrak)", "vaka": { "yas_grubu": "eriskin", "kirmizi_bayrak": ["RF_SESSIZ_AKCIGER"], "parametreler": { "P_KONUSMA": "kisa_cumleler" } } },
+    { "id": "A02", "kategori": "eriskin_hayati", "etiket": ["kategorik"], "gold_turu": "rehber", "beklenen": "hayati_tehdit", "aciklama": "Konusamiyor -> hayati", "vaka": { "yas_grubu": "eriskin", "parametreler": { "P_KONUSMA": "konusamiyor" } } },
+    { "id": "A03", "kategori": "eriskin_hayati", "etiket": ["kategorik"], "gold_turu": "rehber", "beklenen": "hayati_tehdit", "aciklama": "Bilinc konfuzyon -> hayati", "vaka": { "yas_grubu": "eriskin", "parametreler": { "P_BILINC": "konfuzyon", "P_NABIZ": 95 } } },
+
+    { "id": "A04", "kategori": "eriskin_hayati", "etiket": ["terfi"], "gold_turu": "politika", "beklenen": "hayati_tehdit", "aciklama": "SaO2 %86 -> sayisal terfi ile hayati", "vaka": { "yas_grubu": "eriskin", "parametreler": { "P_SAO2": 86 } } },
+    { "id": "A05", "kategori": "eriskin_hayati", "etiket": ["terfi"], "gold_turu": "politika", "beklenen": "hayati_tehdit", "aciklama": "PaCO2 50 mmHg -> sayisal terfi ile hayati", "vaka": { "yas_grubu": "eriskin", "parametreler": { "P_PACO2": 50 } } },
+    { "id": "A06", "kategori": "eriskin_hayati", "etiket": ["astim_disi_acil"], "gold_turu": "rehber", "beklenen": "hayati_tehdit", "aciklama": "Kardiyak tip gogus agrisi -> astim disi acil", "vaka": { "yas_grubu": "eriskin", "kirmizi_bayrak": ["RF_GOGUS_AGRISI_KARDIYAK"], "parametreler": {} } },
+
+    { "id": "A07", "kategori": "eriskin_agir", "etiket": ["sayisal"], "gold_turu": "rehber", "beklenen": "agir", "aciklama": "Nabiz 130 (>120) -> agir", "vaka": { "yas_grubu": "eriskin", "parametreler": { "P_NABIZ": 130 } } },
+    { "id": "A08", "kategori": "eriskin_agir", "etiket": ["sayisal"], "gold_turu": "rehber", "beklenen": "agir", "aciklama": "Solunum hizi 34 (>30) -> agir", "vaka": { "yas_grubu": "eriskin", "parametreler": { "P_SOLUNUM_HIZI": 34, "P_NABIZ": 90 } } },
+    { "id": "A09", "kategori": "eriskin_agir", "etiket": ["sayisal", "pef"], "gold_turu": "rehber", "beklenen": "agir", "aciklama": "PEF %50 (<60) -> agir", "vaka": { "yas_grubu": "eriskin", "parametreler": { "P_PEF": 50, "P_KONUSMA": "kisa_cumleler" } } },
+    { "id": "A10", "kategori": "eriskin_agir", "etiket": ["kategorik"], "gold_turu": "rehber", "beklenen": "agir", "aciklama": "Dinlenmede nefes darligi -> agir", "vaka": { "yas_grubu": "eriskin", "parametreler": { "P_NEFES_DARLIGI": "dinlenmede" } } },
+
+    { "id": "A11", "kategori": "eriskin_orta", "etiket": ["kategorik"], "gold_turu": "rehber", "beklenen": "orta", "aciklama": "Kisa cumlelerle konusma -> orta", "vaka": { "yas_grubu": "eriskin", "parametreler": { "P_KONUSMA": "kisa_cumleler", "P_NABIZ": 90 } } },
+    { "id": "A12", "kategori": "eriskin_orta", "etiket": ["sayisal", "sao2"], "gold_turu": "politika", "beklenen": "orta", "aciklama": "SaO2 %93 (91-95) -> orta", "vaka": { "yas_grubu": "eriskin", "parametreler": { "P_SAO2": 93 } } },
+    { "id": "A13", "kategori": "eriskin_orta", "etiket": ["sayisal"], "gold_turu": "rehber", "beklenen": "orta", "aciklama": "Nabiz 110 (100-120) -> orta", "vaka": { "yas_grubu": "eriskin", "parametreler": { "P_NABIZ": 110 } } },
+
+    { "id": "A14", "kategori": "eriskin_hafif", "etiket": ["kategorik"], "gold_turu": "rehber", "beklenen": "hafif", "aciklama": "Eforla nefes darligi + cumlelerle konusma + nabiz 88 -> hafif", "vaka": { "yas_grubu": "eriskin", "parametreler": { "P_NEFES_DARLIGI": "eforla", "P_KONUSMA": "cumleler", "P_NABIZ": 88 } } },
+    { "id": "A15", "kategori": "eriskin_hafif", "etiket": ["sayisal", "pef"], "gold_turu": "rehber", "beklenen": "hafif", "aciklama": "PEF %90 (>80) -> hafif", "vaka": { "yas_grubu": "eriskin", "parametreler": { "P_PEF": 90, "P_HISILTI": "ekspiryum_sonu" } } },
+
+    { "id": "A16", "kategori": "eriskin_risk", "etiket": ["risk_eskalasyon"], "gold_turu": "politika", "beklenen": "agir", "aciklama": "Orta tablo (kisa cumleler) + entubasyon oykusu -> esik dusurulur -> agir", "vaka": { "yas_grubu": "eriskin", "parametreler": { "P_KONUSMA": "kisa_cumleler", "P_NABIZ": 110 }, "risk_faktorleri": ["RISK_ENTUBASYON_OYKU"] } },
+    { "id": "A17", "kategori": "eriskin_risk", "etiket": ["risk_eskalasyon"], "gold_turu": "politika", "beklenen": "orta", "aciklama": "Hafif tablo (eforla) + son yil yatis -> esik dusurulur -> orta", "vaka": { "yas_grubu": "eriskin", "parametreler": { "P_NEFES_DARLIGI": "eforla", "P_NABIZ": 88 }, "risk_faktorleri": ["RISK_SON_YIL_YATIS"] } },
+
+    { "id": "A18", "kategori": "eriskin_belirsiz", "etiket": ["guvenlik"], "gold_turu": "politika", "beklenen": "belirsiz", "aciklama": "Hic siniflanabilir parametre yok -> guvenli tarafa yuvarla -> belirsiz", "vaka": { "yas_grubu": "eriskin", "parametreler": {} } },
+
+    { "id": "A19", "kategori": "eriskin_agir", "etiket": ["en_agir_kazanir"], "gold_turu": "rehber", "beklenen": "agir", "aciklama": "Cogu hafif ama konusma=kelimeler (agir) -> en agir kazanir", "vaka": { "yas_grubu": "eriskin", "parametreler": { "P_NEFES_DARLIGI": "eforla", "P_NABIZ": 85, "P_KONUSMA": "kelimeler" } } },
+    { "id": "A20", "kategori": "eriskin_hayati", "etiket": ["en_agir_kazanir"], "gold_turu": "rehber", "beklenen": "hayati_tehdit", "aciklama": "Yardimci kas paradoks (hayati) digerleri orta -> en agir kazanir", "vaka": { "yas_grubu": "eriskin", "parametreler": { "P_YARDIMCI_KAS": "paradoks", "P_NABIZ": 110, "P_HISILTI": "belirgin" } } }
+  ]
+}

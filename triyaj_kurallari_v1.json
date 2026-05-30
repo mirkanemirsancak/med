@@ -1,0 +1,112 @@
+{
+  "_meta": {
+    "surum": "0.1.0",
+    "olusturma_amaci": "Astim on-degerlendirme / triyaj prototipi - kural cekirdegi",
+    "kaynak": "Turk Toraks Dernegi Astim Tani ve Tedavi Rehberi (GINA 2007 temelli, ~2009)",
+    "uyari": "Bu set TANI koymaz; aciliyet duzeyi belirler ve yonlendirir. Tedavi onerisi icin guncel GINA bazli ayri set gerekir.",
+    "guvenlik_ilkesi": "Belirsizlikte aciliyeti DUSURME, YUKSELT. (fail-safe / guvenli tarafa yuvarlama)"
+  },
+
+  "kirmizi_bayraklar": {
+    "_aciklama": "Herhangi BIRI varsa sohbet kesilir, dogrudan ACIL yonlendirme yapilir. Bunlar tartisilmaz, modele birakilmaz.",
+    "astim_hayati_tehdit": [
+      { "kod": "RF_SESSIZ_AKCIGER", "tr": "Hisilti duyulmuyor / 'sessiz akciger'", "en": "silent chest", "kaynak": "Tablo 4.4.1" },
+      { "kod": "RF_SIYANOZ", "tr": "Dudak veya ciltte morarma", "en": "cyanosis", "kaynak": "Tablo 4.4.1" },
+      { "kod": "RF_KONFUZYON", "tr": "Bilinc bulaniklligi / uykuya egilim / konfuzyon", "en": "confusion / drowsiness", "kaynak": "Tablo 4.4.1" },
+      { "kod": "RF_KELIME_KONUSMA", "tr": "Yalnizca tek tek kelimelerle konusabiliyor", "en": "speaks single words only", "kaynak": "Tablo 4.4.1" },
+      { "kod": "RF_PARADOKS_SOLUNUM", "tr": "Torako-abdominal paradoks hareket", "en": "paradoxical breathing", "kaynak": "Tablo 4.4.1" },
+      { "kod": "RF_BRADIKARDI", "tr": "Nabizda dusme (bradikardi)", "en": "bradycardia", "kaynak": "Tablo 4.4.1" },
+      { "kod": "RF_SAO2_DUSUK", "tr": "SaO2 < %90", "en": "SaO2 < 90%", "kaynak": "Tablo 4.4.1 / atak bolumu", "olcum": true, "terfi": { "parametre": "P_SAO2", "op": "<", "esik": 90 } },
+      { "kod": "RF_PACO2_YUKSEK", "tr": "PaCO2 > 45 mmHg", "en": "PaCO2 > 45 mmHg", "kaynak": "Tablo 4.4.1", "olcum": true, "terfi": { "parametre": "P_PACO2", "op": ">", "esik": 45 } },
+      { "kod": "RF_BESLENME_KESILMESI", "tr": "Bebek nefes darligindan beslenmeyi/emmeyi kesiyor", "en": "infant stops feeding due to dyspnea", "kaynak": "Bolum 6.2 - yaklasan solunum yetersizligi", "yas": "bebek" }
+    ],
+    "astim_disi_acil": {
+      "_aciklama": "Astim bilmiyor olmamiz, semptomun masum oldugu anlamina gelmez. Ayirici tanida acil olabilecek durumlar.",
+      "liste": [
+        { "kod": "RF_GOGUS_AGRISI_KARDIYAK", "tr": "Baskili/sikistirici gogus agrisi, kola/ceneye yayilma, soguk terleme", "en": "cardiac-type chest pain", "dusunulen": "kardiyak olay / sol kalp yetmezligi", "kaynak": "Ayirici tani - Bolum 2" },
+        { "kod": "RF_ANI_NEFES_DARLIGI_TEK_TARAF", "tr": "Ani baslayan nefes darligi + tek tarafli gogus agrisi", "en": "sudden dyspnea + unilateral chest pain", "dusunulen": "pulmoner emboli / pnomotoraks", "kaynak": "Ayirici tani - atak bolumu" },
+        { "kod": "RF_BACAK_SISLIK_AGRI", "tr": "Tek bacakta sislik/agri + nefes darligi", "en": "unilateral leg swelling + dyspnea", "dusunulen": "pulmoner emboli", "kaynak": "Ayirici tani" },
+        { "kod": "RF_YABANCI_CISIM", "tr": "Ani bogulma / yabanci cisim aspirasyonu suphesi", "en": "choking / foreign body aspiration", "dusunulen": "havayolu tikanikligi", "kaynak": "Ayirici tani - Bolum 2" }
+      ]
+    }
+  },
+
+  "atak_agirlik_eriskin": {
+    "_aciklama": "Tablo 4.4.1. KURAL: Bir basamagi belirlemek icin parametrelerin TUMU degil, BIRKACI yeterli. En agir bulgu sinifi kazanir.",
+    "siniflar": ["hafif", "orta", "agir", "hayati_tehdit"],
+    "parametreler": [
+      {
+        "kod": "P_NEFES_DARLIGI", "tr": "Nefes darligi", "en": "dyspnea", "tip": "kategorik",
+        "esikler": { "hafif": "eforla, yatabilir", "orta": "konusurken, oturmayi tercih eder", "agir": "dinlenmede, one egilmis", "hayati_tehdit": "dinlenmede, konusamaz" }
+      },
+      {
+        "kod": "P_KONUSMA", "tr": "Konusma", "en": "speech", "tip": "kategorik",
+        "esikler": { "hafif": "cumleler", "orta": "kisa cumleler", "agir": "kelimeler", "hayati_tehdit": "konusamiyor" }
+      },
+      {
+        "kod": "P_BILINC", "tr": "Bilinc durumu", "en": "consciousness", "tip": "kategorik",
+        "esikler": { "hafif": "huzursuz olabilir", "orta": "cogunlukla huzursuz", "agir": "cogunlukla huzursuz", "hayati_tehdit": "konfuzyon / uykuya egilim" }
+      },
+      {
+        "kod": "P_SOLUNUM_HIZI", "tr": "Solunum hizi (dk)", "en": "respiratory rate", "tip": "sayisal", "olcum": true,
+        "esikler": { "hafif": "artmis", "orta": "artmis", "agir": ">30" }
+      },
+      {
+        "kod": "P_YARDIMCI_KAS", "tr": "Yardimci solunum kaslari kullanimi", "en": "accessory muscle use", "tip": "kategorik",
+        "esikler": { "hafif": "yok", "orta": "var", "agir": "var", "hayati_tehdit": "paradoks hareket" }
+      },
+      {
+        "kod": "P_HISILTI", "tr": "Hisilti", "en": "wheeze", "tip": "kategorik",
+        "esikler": { "hafif": "ekspiryum sonu", "orta": "belirgin", "agir": "belirgin", "hayati_tehdit": "sessiz akciger" }
+      },
+      {
+        "kod": "P_NABIZ", "tr": "Nabiz (dk)", "en": "pulse", "tip": "sayisal", "olcum": true,
+        "esikler": { "hafif": "<100", "orta": "100-120", "agir": ">120", "hayati_tehdit": "bradikardi" }
+      },
+      {
+        "kod": "P_PEF", "tr": "PEF (% beklenen veya kisisel en iyi)", "en": "PEF % predicted/best", "tip": "sayisal", "olcum": true, "opsiyonel": true,
+        "esikler": { "hafif": ">80", "orta": "60-80", "agir": "<60 (veya <100 L/dk)" }
+      },
+      {
+        "kod": "P_SAO2", "tr": "SaO2 (oda havasi, %)", "en": "SaO2 room air", "tip": "sayisal", "olcum": true, "opsiyonel": true,
+        "esikler": { "hafif": ">95", "orta": "91-95", "agir": "<90" }
+      }
+    ]
+  },
+
+  "atak_agirlik_cocuk": {
+    "_aciklama": "Tablo 6.2.8. Cocuk icin solunum hizi esikleri yasa gore degisir. <5 yas spirometri/PEF guvenilir DEGIL.",
+    "solunum_hizi_normal_ust_sinir": [
+      { "yas": "<2 ay", "ust_sinir": 60 },
+      { "yas": "2-12 ay", "ust_sinir": 50 },
+      { "yas": "1-5 yas", "ust_sinir": 40 },
+      { "yas": "6-8 yas", "ust_sinir": 30 }
+    ],
+    "ek_isaret": { "kod": "P_BESLENME_KESILMESI", "tr": "Bebek beslenmeyi/emmeyi kesiyor", "en": "infant stops feeding", "anlam": "yaklasan solunum yetersizligi - ONEMLI", "kaynak": "Bolum 6.2" }
+  },
+
+  "olumcul_atak_risk_faktorleri": {
+    "_aciklama": "Bunlar tek baslarina aciliyet sinifi BELIRLEMEZ ama varliklari esigi DUSURUR: ayni tabloda daha tedbirli davran, erken yonlendir.",
+    "kaynak": "Eriskin atak bolumu s.48 / Tablo 6.2.9",
+    "liste": [
+      { "kod": "RISK_ENTUBASYON_OYKU", "tr": "Gecmiste entubasyon / mekanik ventilasyon gerektiren atak", "en": "prior intubation/ventilation" },
+      { "kod": "RISK_SON_YIL_YATIS", "tr": "Son 1 yilda astim nedeniyle yatis veya acil basvuru", "en": "hospitalization/ED visit in last year" },
+      { "kod": "RISK_ORAL_STEROID", "tr": "Halen oral steroid kullaniyor veya yeni biraktI", "en": "current/recent oral steroid" },
+      { "kod": "RISK_IKS_YOK", "tr": "Inhaler steroid kullanmiyor veya yeni biraktI", "en": "not on/recently stopped ICS" },
+      { "kod": "RISK_ASIRI_SABA", "tr": "Asiri kurtarici kullanimi (>1 kutu/ay salbutamol)", "en": "overuse of SABA (>1 canister/month)" },
+      { "kod": "RISK_PSIKOSOSYAL", "tr": "Psikiyatrik hastalik veya psikososyal sorun", "en": "psychiatric/psychosocial issues" },
+      { "kod": "RISK_UYUMSUZLUK", "tr": "Tedaviye uyumsuzluk", "en": "poor adherence" },
+      { "kod": "RISK_DUSUK_SES", "tr": "Dusuk sosyoekonomik duzey", "en": "low socioeconomic status" },
+      { "kod": "RISK_KOMORBIDITE", "tr": "Eslik eden hastalik (kardiyovaskuler/diger akciger)", "en": "comorbidity" }
+    ]
+  },
+
+  "yonlendirme_haritasi": {
+    "_aciklama": "Aciliyet sinifi -> hasta gorunumunde gosterilecek yonlendirme. Hasta surumu TANI/ILAC soylemez, sadece yonlendirir.",
+    "hayati_tehdit": { "hasta_mesaj": "Acil tibbi yardim alin (112 / en yakin acil servis).", "hekim_etiket": "Hayati tehdit eden atak - derhal mudahale" },
+    "agir":          { "hasta_mesaj": "Vakit kaybetmeden acil servise basvurun.", "hekim_etiket": "Agir atak - hastane kosullari" },
+    "orta":          { "hasta_mesaj": "Bugun bir hekime/acile basvurun.", "hekim_etiket": "Orta atak - yakin degerlendirme" },
+    "hafif":         { "hasta_mesaj": "Yakin zamanda hekiminize danisin; belirtiler kotuleserse acile basvurun.", "hekim_etiket": "Hafif atak - ayaktan degerlendirilebilir" },
+    "belirsiz":      { "hasta_mesaj": "Belirtileriniz net degerlendirilemedi; guvenli olmasi icin bir hekime danisin.", "hekim_etiket": "Yetersiz veri - guvenli tarafa yuvarlandi" }
+  }
+}

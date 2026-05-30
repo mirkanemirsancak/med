@@ -1,0 +1,11 @@
+{
+  "yas_grubu": "eriskin",
+  "kirmizi_bayrak": [],
+  "parametreler": {
+    "P_NEFES_DARLIGI": "konusurken",
+    "P_KONUSMA": "kisa_cumleler",
+    "P_NABIZ": 110,
+    "P_SAO2": 93
+  },
+  "risk_faktorleri": ["RISK_ENTUBASYON_OYKU"]
+}

@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Astim Triyaj</title>
+  <style>
+    :root { --bg:#0f1115; --card:#1a1d24; --line:#2a2f3a; --txt:#e7eaf0; --mut:#9aa3b2; --acc:#4f86f7; }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+           background:var(--bg); color:var(--txt); line-height:1.5; }
+    .wrap { max-width: 920px; margin: 0 auto; padding: 24px 16px 64px; }
+    h1 { font-size: 1.5rem; margin: 0 0 4px; }
+    .sub { color: var(--mut); margin: 0 0 24px; font-size: .9rem; }
+    .grid { display:grid; grid-template-columns: 1fr 1fr; gap:16px; }
+    @media (max-width:720px){ .grid { grid-template-columns: 1fr; } }
+    .card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:16px; }
+    .card h2 { font-size:1rem; margin:0 0 12px; }
+    label { display:block; font-size:.85rem; color:var(--mut); margin:10px 0 4px; }
+    select, input[type=number], input[type=text] {
+      width:100%; padding:8px 10px; background:#0f1218; color:var(--txt);
+      border:1px solid var(--line); border-radius:8px; font-size:.95rem; }
+    .check { display:flex; gap:8px; align-items:flex-start; margin:6px 0; font-size:.88rem; color:var(--txt); }
+    .check input { margin-top:3px; }
+    .btn { margin-top:20px; background:var(--acc); color:#fff; border:0; padding:12px 20px;
+           border-radius:10px; font-size:1rem; cursor:pointer; width:100%; }
+    .btn:hover { filter:brightness(1.08); }
+    .row2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    .result { margin-top:24px; border-radius:12px; padding:18px; border:1px solid var(--line); }
+    .badge { display:inline-block; font-weight:700; padding:6px 14px; border-radius:999px; font-size:1.05rem; }
+    .hayati_tehdit { background:#3a0d12; border:1px solid #7f1d2b; }
+    .hayati_tehdit .badge { background:#e5484d; color:#fff; }
+    .agir { background:#3a1f0d; border:1px solid #7f4a1d; }
+    .agir .badge { background:#f5a524; color:#000; }
+    .orta { background:#3a360d; border:1px solid #7f771d; }
+    .orta .badge { background:#f3e44b; color:#000; }
+    .hafif { background:#0d3a1c; border:1px solid #1d7f3f; }
+    .hafif .badge { background:#46c46a; color:#000; }
+    .belirsiz { background:#1f2530; border:1px solid #3a4452; }
+    .belirsiz .badge { background:#9aa3b2; color:#000; }
+    .result h3 { margin:12px 0 6px; font-size:.95rem; }
+    .result p { margin:4px 0; }
+    ul { margin:4px 0; padding-left:20px; }
+    li { font-size:.88rem; color:var(--mut); }
+    .msg { font-size:1.02rem; }
+    .warn { background:#1f2530; border:1px dashed #3a4452; padding:10px 12px;
+            border-radius:8px; color:var(--mut); font-size:.8rem; margin-bottom:20px; }
+    code { background:#0f1218; padding:1px 5px; border-radius:4px; }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Astim On-Degerlendirme / Triyaj</h1>
+  <p class="sub">Yapilandirilmis vaka -> aciliyet sinifi + yonlendirme. Deterministik kural motoru.</p>
+  <div class="warn">
+    Bu arac <b>TANI KOYMAZ</b> ve tedavi onermez; yalnizca aciliyet duzeyini belirler.
+    Belirsizlikte aciliyeti yukseltir (fail-safe). Gercek karar hekime aittir.
+  </div>
+
+  <form method="post">
+    <div class="grid">
+      <div class="card">
+        <h2>Hasta</h2>
+        <label>Yas grubu</label>
+        <select name="yas_grubu">
+          <option value="eriskin" {% if vaka and vaka.yas_grubu=='eriskin' %}selected{% endif %}>Eriskin</option>
+          <option value="cocuk" {% if vaka and vaka.yas_grubu=='cocuk' %}selected{% endif %}>Cocuk</option>
+        </select>
+        <label>Yas (ay) <span style="opacity:.7">- cocukta solunum hizi/PEF icin gerekli</span></label>
+        <input type="number" name="yas_ay" min="0" placeholder="orn. 36"
+               value="{{ vaka.yas_ay if vaka and vaka.yas_ay is defined else '' }}">
+
+        <h2 style="margin-top:18px">Sayisal olcumler</h2>
+        {% for kod, (etiket, birim, ipucu) in meta.sayisal.items() %}
+          <label>{{ etiket }} ({{ birim }}) <span style="opacity:.6">- {{ ipucu }}</span></label>
+          <input type="number" step="any" name="{{ kod }}"
+                 value="{{ vaka.parametreler[kod] if vaka and kod in vaka.parametreler else '' }}">
+        {% endfor %}
+      </div>
+
+      <div class="card">
+        <h2>Klinik bulgular</h2>
+        {% for kod, secenekler in meta.kategorik.items() %}
+          <label>{{ kod.replace('P_','').replace('_',' ').title() }}</label>
+          <select name="{{ kod }}">
+            <option value="">- secilmedi -</option>
+            {% for token, etiket in secenekler.items() %}
+              <option value="{{ token }}"
+                {% if vaka and vaka.parametreler.get(kod)==token %}selected{% endif %}>{{ etiket }}</option>
+            {% endfor %}
+          </select>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="grid" style="margin-top:16px">
+      <div class="card">
+        <h2>Kirmizi bayraklar (varsa dogrudan ACIL)</h2>
+        {% for kod, tr in meta.kirmizi_bayraklar %}
+          <div class="check">
+            <input type="checkbox" name="kirmizi_bayrak" value="{{ kod }}" id="k_{{ kod }}"
+              {% if vaka and kod in vaka.kirmizi_bayrak %}checked{% endif %}>
+            <label for="k_{{ kod }}" style="margin:0; color:var(--txt)">{{ tr }}</label>
+          </div>
+        {% endfor %}
+      </div>
+
+      <div class="card">
+        <h2>Olumcul atak risk faktorleri (esigi dusurur)</h2>
+        {% for kod, tr in meta.risk_faktorleri %}
+          <div class="check">
+            <input type="checkbox" name="risk_faktorleri" value="{{ kod }}" id="r_{{ kod }}"
+              {% if vaka and kod in vaka.risk_faktorleri %}checked{% endif %}>
+            <label for="r_{{ kod }}" style="margin:0; color:var(--txt)">{{ tr }}</label>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <button class="btn" type="submit">Triyaj yap</button>
+  </form>
+
+  {% if sonuc %}
+  <div class="result {{ sonuc.sinif }}">
+    <span class="badge">{{ sonuc.sinif.upper().replace('_',' ') }}</span>
+    <h3>Hasta mesaji</h3>
+    <p class="msg">{{ sonuc.yonlendirme.hasta_mesaj }}</p>
+    <h3>Hekim etiketi</h3>
+    <p>{{ sonuc.yonlendirme.hekim_etiket }}</p>
+
+    {% if sonuc.kirmizi_bayrak %}
+      <h3>Tetiklenen kirmizi bayraklar</h3>
+      <ul>{% for kod, tr in sonuc.kirmizi_bayrak %}<li>[{{ kod }}] {{ tr }}</li>{% endfor %}</ul>
+    {% endif %}
+    {% if sonuc.aktif_risk_faktorleri %}
+      <h3>Aktif risk faktorleri</h3>
+      <ul>{% for r in sonuc.aktif_risk_faktorleri %}<li>{{ r }}</li>{% endfor %}</ul>
+    {% endif %}
+    {% if sonuc.agirlik_gerekce %}
+      <h3>Agirlik gerekcesi</h3>
+      <ul>{% for g in sonuc.agirlik_gerekce %}<li>{{ g }}</li>{% endfor %}</ul>
+    {% endif %}
+    <h3>Karar adimlari</h3>
+    <ul>{% for a in sonuc.adimlar %}<li>{{ a }}</li>{% endfor %}</ul>
+  </div>
+  {% endif %}
+</div>
+</body>
+</html>

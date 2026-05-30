@@ -1,0 +1,30 @@
+{
+  "_meta": {
+    "surum": "0.1.0",
+    "kapsam": "COCUK (pediatrik) vinyetler. Bolum 6 / Tablo 6.2.8 turevi KURGU vakalar.",
+    "uyari": "Gercek hasta verisi DEGIL. Erişkin esikleri cocuga UYGULANMAMALI; bu set onu da test eder.",
+    "kritik_farklar": "RR yasa bagli; PEF <5 yas guvenilir degil; SaO2 <92 cocukta tedbirli; bebek beslenme kesilmesi = kirmizi bayrak."
+  },
+  "vinyetler": [
+
+    { "id": "C01", "kategori": "cocuk_hayati", "etiket": ["red_flag", "bebek"], "gold_turu": "rehber", "beklenen": "hayati_tehdit", "aciklama": "Bebek beslenmeyi kesiyor -> yaklasan solunum yetersizligi (kirmizi bayrak)", "vaka": { "yas_grubu": "cocuk", "yas_ay": 8, "kirmizi_bayrak": ["RF_BESLENME_KESILMESI"], "parametreler": {} } },
+    { "id": "C02", "kategori": "cocuk_agir", "etiket": ["pediatrik_sao2"], "gold_turu": "politika", "beklenen": "agir", "aciklama": "Cocuk SaO2 %91 -> agir (cocukta <92 daha tedbirli; eriskinde orta olurdu)", "vaka": { "yas_grubu": "cocuk", "yas_ay": 48, "parametreler": { "P_SAO2": 91 } } },
+    { "id": "C03", "kategori": "cocuk_hayati", "etiket": ["terfi"], "gold_turu": "politika", "beklenen": "hayati_tehdit", "aciklama": "Cocuk SaO2 %89 -> terfi ile hayati", "vaka": { "yas_grubu": "cocuk", "yas_ay": 48, "parametreler": { "P_SAO2": 89 } } },
+    { "id": "C04", "kategori": "cocuk_orta", "gold_turu": "politika", "beklenen": "orta", "aciklama": "Cocuk SaO2 %93 -> orta", "vaka": { "yas_grubu": "cocuk", "yas_ay": 48, "parametreler": { "P_SAO2": 93 } } },
+
+    { "id": "C05", "kategori": "cocuk_orta", "etiket": ["yasa_bagli_rr", "klinik_inceleme"], "gold_turu": "politika", "beklenen": "orta", "aciklama": "3 yas (36 ay), RR 45 > yas-ust-siniri 40 -> orta. (Cocukta 'agir' RR esigi kaynakta TANIMSIZ; klinik onay)", "vaka": { "yas_grubu": "cocuk", "yas_ay": 36, "parametreler": { "P_SOLUNUM_HIZI": 45 } } },
+    { "id": "C06", "kategori": "cocuk_hafif", "etiket": ["yasa_bagli_rr"], "gold_turu": "politika", "beklenen": "hafif", "aciklama": "3 yas, RR 38 < 40 -> hafif (normal sinirda)", "vaka": { "yas_grubu": "cocuk", "yas_ay": 36, "parametreler": { "P_SOLUNUM_HIZI": 38 } } },
+    { "id": "C07", "kategori": "cocuk_orta", "etiket": ["yasa_bagli_rr"], "gold_turu": "politika", "beklenen": "orta", "aciklama": "6 ay bebek, RR 55 > 50 -> orta", "vaka": { "yas_grubu": "cocuk", "yas_ay": 6, "parametreler": { "P_SOLUNUM_HIZI": 55 } } },
+    { "id": "C08", "kategori": "cocuk_orta", "etiket": ["yasa_bagli_rr"], "gold_turu": "politika", "beklenen": "orta", "aciklama": "7 yas (84 ay), RR 32 > 30 -> orta", "vaka": { "yas_grubu": "cocuk", "yas_ay": 84, "parametreler": { "P_SOLUNUM_HIZI": 32 } } },
+
+    { "id": "C09", "kategori": "cocuk_belirsiz", "etiket": ["pef_guvenilmez"], "gold_turu": "politika", "beklenen": "belirsiz", "aciklama": "4 yas (48 ay), yalniz PEF 50 -> PEF <5 yas guvenilir degil, dikkate alinmaz -> belirsiz", "vaka": { "yas_grubu": "cocuk", "yas_ay": 48, "parametreler": { "P_PEF": 50 } } },
+    { "id": "C10", "kategori": "cocuk_orta", "etiket": ["pef_buyuk_cocuk"], "gold_turu": "politika", "beklenen": "orta", "aciklama": "7 yas (84 ay), PEF 70 -> >=5 yas guvenilir -> orta", "vaka": { "yas_grubu": "cocuk", "yas_ay": 84, "parametreler": { "P_PEF": 70 } } },
+
+    { "id": "C11", "kategori": "cocuk_belirsiz", "etiket": ["guvenlik", "yas_yok"], "gold_turu": "politika", "beklenen": "belirsiz", "aciklama": "GUVENLIK TESTI: cocuk, RR 50 ama YAS YOK -> erişkin esigi (>30 agir) UYGULANMAZ -> belirsiz", "vaka": { "yas_grubu": "cocuk", "parametreler": { "P_SOLUNUM_HIZI": 50 } } },
+
+    { "id": "C12", "kategori": "cocuk_hayati", "etiket": ["red_flag"], "gold_turu": "rehber", "beklenen": "hayati_tehdit", "aciklama": "Cocuk siyanoz", "vaka": { "yas_grubu": "cocuk", "yas_ay": 60, "kirmizi_bayrak": ["RF_SIYANOZ"], "parametreler": {} } },
+    { "id": "C13", "kategori": "cocuk_agir", "gold_turu": "rehber", "beklenen": "agir", "aciklama": "Cocuk kelime kelime konusma", "vaka": { "yas_grubu": "cocuk", "yas_ay": 72, "parametreler": { "P_KONUSMA": "kelimeler" } } },
+    { "id": "C14", "kategori": "cocuk_agir", "gold_turu": "rehber", "beklenen": "agir", "aciklama": "Cocuk dinlenmede nefes darligi", "vaka": { "yas_grubu": "cocuk", "yas_ay": 60, "parametreler": { "P_NEFES_DARLIGI": "dinlenmede" } } },
+    { "id": "C15", "kategori": "cocuk_orta", "etiket": ["en_agir_kazanir"], "gold_turu": "politika", "beklenen": "orta", "aciklama": "3 yas, bilinc huzursuz (orta) + RR 45 (orta) -> orta", "vaka": { "yas_grubu": "cocuk", "yas_ay": 36, "parametreler": { "P_BILINC": "huzursuz", "P_SOLUNUM_HIZI": 45 } } }
+  ]
+}
