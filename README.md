@@ -105,9 +105,27 @@ Kod doğrulanmış olsa da şu maddeler **klinik/yönetişim** kararı bekler:
 - **Denetim izi:** Sürüm damgası var; girdi+çıktıyı kalıcı, indirilebilir bir kayda
   yazmak savunulabilirlik için önerilir.
 
+## Tier 2.1 — Konuşma / kod çıkarımı katmanı (uygulandı)
+
+Hasta modunda **serbest metin** kutusu: kullanıcı durumunu günlük dille anlatır;
+katman bunu yalnızca **kavram koduna** çevirip formu doldurur. Karar yine
+deterministik `triyaj()` motorundadır.
+
+Güvenlik sınırı (yapısal olarak zorlanır, `docs/cikarim.js`):
+- LLM **aciliyet kararı vermez**, yalnızca `{parametreler, kirmizi_bayrak,
+  risk_faktorleri, takip_sorusu}` kodları önerir.
+- **Whitelist dışı hiçbir kod geçmez** — `cikarimDogrula()` tanımsız/uydurma
+  kodları (halüsinasyon) atar ve raporlar.
+- Belirsizlikte **tek bir takip sorusu** önerilir; bulgu uydurulmaz.
+- **Çevrimdışı yedek:** Claude API anahtarı girilirse gerçek çağrı yapılır
+  (istemci tarafı, anahtar yalnız tarayıcıda); yoksa veya hata olursa deterministik
+  anahtar-kelime eşleyici + form akışına düşülür (graceful fallback).
+
+Bu katman da test edilir (`docs/test_cikarim.js`): halüsinasyon koruması,
+"LLM karar vermez", mock→doğrula→triyaj zinciri, belirsizlik→takip sorusu.
+
 ## Sonraki adımlar (planlanan)
 
-Tier 2.1 (LLM slot-filling konuşma katmanı — laik kullanıcı "sessiz akciğer"i
-kendi bildiremez; mevcut hasta formu klinik okuryazarlık varsayıyor) ve Tier 2.3
-(hekim-modu RAG açıklama, rehber pasajına bağlı) motor doğrulandıktan **sonra**
-sıradaki en değerli adımlardır.
+Tier 2.3 (hekim-modu RAG açıklama, rehber pasajına bağlı "neden bu sınıf") ve
+Tier 3 klinik/regülasyon imzaları. Gerçek Claude çağrısının canlı doğrulaması
+bir API anahtarı gerektirir; mock ile sözleşme ve güvenlik sınırı kanıtlanmıştır.

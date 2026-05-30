@@ -9,6 +9,14 @@ echo "### 1) Vinyet regresyon + sinir kapisi (JS motor) ###"
 node docs/test_vinyet.js
 
 echo
+echo "### 1b) Cikarim katmani (LLM guvenlik siniri) ###"
+node docs/test_cikarim.js
+
+echo
+echo "### 1c) UI entegrasyon (jsdom; yoksa atlanir) ###"
+node docs/test_ui.js
+
+echo
 echo "### 2) Capraz-motor parite (Python <-> JS) ###"
 PYTHONPATH="$KOK" python3 test_parite.py
 

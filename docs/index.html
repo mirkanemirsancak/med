@@ -76,6 +76,25 @@
     <button type="button" id="modHekim" onclick="modDegistir('hekim')">Hekim gorunumu</button>
   </div>
 
+  <!-- Tier 2.1 - Hasta modu serbest metin (LLM yalnizca kod cikarir, KARAR VERMEZ) -->
+  <div class="card" id="konusmaKart" style="margin-bottom:16px">
+    <h2>Durumunuzu kendi cumlelerinizle anlatin</h2>
+    <p style="color:var(--mut);font-size:.82rem;margin:0 0 8px">
+      Yazdiklariniz yalnizca <b>asagidaki forma cevrilir</b>; aciliyet karari her zaman
+      deterministik kural motoru tarafindan verilir. Cevrilen kodlari gonderim oncesi gorebilir
+      ve duzeltebilirsiniz.</p>
+    <textarea id="serbestMetin" rows="3" placeholder="Orn: Eforla nefesim daraliyor ama cumlelerle konusabiliyorum, nabzim 90 civari."
+      style="width:100%;padding:8px 10px;background:#0f1218;color:var(--txt);border:1px solid var(--line);border-radius:8px;font-size:.95rem"></textarea>
+    <details style="margin-top:8px">
+      <summary style="cursor:pointer;color:var(--mut);font-size:.8rem">Claude API anahtari (istege bagli; girilmezse cevrimdisi esleme kullanilir)</summary>
+      <input type="password" id="apiAnahtar" placeholder="sk-ant-... (yalniz tarayicinizda saklanir)"
+        style="width:100%;margin-top:6px;padding:8px 10px;background:#0f1218;color:var(--txt);border:1px solid var(--line);border-radius:8px;font-size:.9rem">
+      <p style="color:var(--mut);font-size:.72rem;margin:6px 0 0">Anahtar yalniz bu tarayicida (localStorage) tutulur, sunucuya gonderilmez. Statik site oldugu icin dogrudan Claude'a istek atilir.</p>
+    </details>
+    <button type="button" class="btn" id="cevirBtn" style="margin-top:10px">Anlatimi forma cevir</button>
+    <div id="cevirimDurum" style="font-size:.82rem;margin-top:8px;color:var(--mut)"></div>
+  </div>
+
   <form id="triyajForm">
     <div class="grid">
       <div class="card">
@@ -117,8 +136,10 @@
 </div>
 
 <script src="triyaj_motor.js"></script>
+<script src="cikarim.js"></script>
 <script>
 const M = window.TriyajMotor;
+const C = window.TriyajCikarim;
 const { KURALLAR, KATEGORIK_ETIKET, SAYISAL_ALAN } = M;
 let MOD = "hasta"; // 0.1 - varsayilan Hasta
 
@@ -167,10 +188,79 @@ function modDegistir(mod){
   MOD = mod;
   document.getElementById("modHasta").classList.toggle("aktif", mod === "hasta");
   document.getElementById("modHekim").classList.toggle("aktif", mod === "hekim");
+  // Serbest metin/konusma karti yalniz hasta modunda (hekim formu zaten klinik dilde)
+  document.getElementById("konusmaKart").style.display = (mod === "hasta") ? "" : "none";
   // formu yeniden kur (PaCO2 gizle/goster); onceki sonucu temizle
   formuKur();
   document.getElementById("sonucAlan").innerHTML = "";
   document.getElementById("hataAlan").innerHTML = "";
+}
+
+// --- Tier 2.1: serbest metin -> kod cikarimi -> formu doldur ---
+// Karari MOTOR verir; burasi yalnizca formu onceden doldurur. Kullanici gonderim
+// oncesi gorur ve duzeltir.
+function vakayiFormaUygula(vaka){
+  const f = document.getElementById("triyajForm").elements;
+  if (vaka.yas_grubu && f["yas_grubu"]) f["yas_grubu"].value = vaka.yas_grubu;
+  for (const [kod, deger] of Object.entries(vaka.parametreler || {})){
+    if (f[kod]) f[kod].value = deger;        // alan o modda goruluyorsa
+  }
+  (vaka.kirmizi_bayrak || []).forEach(k => { const e = document.getElementById("k_"+k); if (e) e.checked = true; });
+  (vaka.risk_faktorleri || []).forEach(r => { const e = document.getElementById("r_"+r); if (e) e.checked = true; });
+}
+
+// Gercek Claude cagrisi (anahtar varsa). Cikti SADECE kod JSON'u; karar yok.
+async function claudeCikar(metin, yasGrubu, anahtar){
+  const govde = {
+    model: "claude-opus-4-8",
+    max_tokens: 600,
+    system: C.sistemPrompt(),
+    messages: [{ role: "user", content:
+      "Hastanin anlatimi:\n\"" + metin + "\"\n\nYalniz JSON dondur: " +
+      "{parametreler, kirmizi_bayrak, risk_faktorleri, takip_sorusu}. Baska metin yazma." }]
+  };
+  const r = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: { "content-type": "application/json", "x-api-key": anahtar,
+               "anthropic-version": "2023-06-01", "anthropic-dangerous-direct-browser-access": "true" },
+    body: JSON.stringify(govde)
+  });
+  if (!r.ok) throw new Error("API " + r.status);
+  const data = await r.json();
+  const txt = (data.content || []).map(b => b.text || "").join("");
+  const m = txt.match(/\{[\s\S]*\}/);
+  if (!m) throw new Error("JSON cikti bulunamadi");
+  return JSON.parse(m[0]);
+}
+
+async function anlatimiCevir(){
+  const metin = document.getElementById("serbestMetin").value.trim();
+  const durum = document.getElementById("cevirimDurum");
+  if (!metin){ durum.textContent = "Once durumunuzu yazin."; return; }
+  const yasGrubu = document.getElementById("triyajForm").elements["yas_grubu"].value;
+  const anahtar = document.getElementById("apiAnahtar").value.trim();
+  if (anahtar) localStorage.setItem("triyaj_api", anahtar);
+
+  let ham, kaynak;
+  durum.textContent = "Cevriliyor...";
+  try {
+    if (anahtar){ ham = await claudeCikar(metin, yasGrubu, anahtar); kaynak = "Claude"; }
+    else { ham = C.mockCikar(metin, yasGrubu); kaynak = "cevrimdisi esleme"; }
+  } catch(e){
+    // graceful fallback: API hatasi -> mock + uyari
+    ham = C.mockCikar(metin, yasGrubu); kaynak = "cevrimdisi esleme (API hatasi: " + e.message + ")";
+  }
+
+  // GUVENLIK: whitelist disi kod gecmez
+  const { vaka, atilanlar, takip_sorusu } = C.cikarimDogrula(ham, yasGrubu);
+  vakayiFormaUygula(vaka);
+
+  const kodSay = Object.keys(vaka.parametreler).length + vaka.kirmizi_bayrak.length + vaka.risk_faktorleri.length;
+  let mesaj = `Kaynak: ${esc(kaynak)}. ${kodSay} bulgu forma islendi. Lutfen kontrol edip "Triyaj yap" deyin.`;
+  if (takip_sorusu) mesaj += `<br><b>Ek soru:</b> ${esc(takip_sorusu)}`;
+  if (atilanlar.length) mesaj += `<br><span style="opacity:.7">Gecersiz/tanimsiz atildi: ${esc(atilanlar.join(", "))}</span>`;
+  if (kodSay === 0 && !takip_sorusu) mesaj += `<br>Otomatik bulgu cikarilamadi; lutfen formu elle doldurun.`;
+  durum.innerHTML = mesaj;
 }
 
 function formdanVaka(form){
@@ -238,6 +328,11 @@ function hatalariGoster(hatalar){
 }
 
 formuKur();
+// Tier 2.1 baglanti
+const _kayitliAnahtar = localStorage.getItem("triyaj_api");
+if (_kayitliAnahtar) document.getElementById("apiAnahtar").value = _kayitliAnahtar;
+document.getElementById("cevirBtn").addEventListener("click", anlatimiCevir);
+
 document.getElementById("triyajForm").addEventListener("submit", e => {
   e.preventDefault();
   const vaka = formdanVaka(e.target);
